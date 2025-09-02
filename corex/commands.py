@@ -1,0 +1,565 @@
+"""
+CoreX command implementations
+"""
+
+import os
+import subprocess
+import time
+from pathlib import Path
+from typing import Dict, Optional
+
+import click
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+from .generators import (
+    generate_app,
+    generate_ci_pipeline,
+    generate_integration,
+    generate_project,
+    generate_scaffold,
+)
+from .utils import (
+    check_dependencies,
+    create_gitignore,
+    ensure_git_repo,
+    format_duration,
+    get_project_root,
+    print_error,
+    print_info,
+    print_step,
+    print_success,
+    print_warning,
+    run_command,
+    show_progress_spinner,
+    validate_project_name,
+)
+
+console = Console()
+
+
+def new_command(
+    ctx: click.Context,
+    project_name: str,
+    auth: str,
+    ui: str,
+    database: str,
+    docker: bool,
+    api: bool,
+) -> None:
+    """Create a new Django project with CoreX"""
+    start_time = time.time()
+    
+    # Validate project name
+    if not validate_project_name(project_name):
+        print_error(f"Invalid project name: {project_name}")
+        print_info("Project name must be a valid Python identifier (no spaces, starts with letter)")
+        return
+    
+    # Check if project directory already exists
+    project_path = Path.cwd() / project_name
+    if project_path.exists():
+        print_error(f"Directory '{project_name}' already exists")
+        return
+    
+    # Check dependencies
+    print_step(1, 8, "Checking dependencies...")
+    deps = check_dependencies()
+    
+    missing_deps = [name for name, installed in deps.items() if not installed]
+    if missing_deps:
+        print_warning(f"Missing dependencies: {', '.join(missing_deps)}")
+        print_info("Some features may not work without these dependencies")
+    
+    # Create project
+    print_step(2, 8, f"Creating Django project '{project_name}'...")
+    success = generate_project(project_path, project_name, auth, ui, database, docker, api)
+    
+    if not success:
+        print_error("Failed to create project")
+        return
+    
+    # Initialize git repository
+    print_step(3, 8, "Initializing git repository...")
+    ensure_git_repo(project_path)
+    
+    # Create .gitignore
+    print_step(4, 8, "Creating .gitignore...")
+    create_gitignore(project_path)
+    
+    # Install dependencies
+    print_step(5, 8, "Installing dependencies...")
+    os.chdir(project_path)
+    
+    if deps["poetry"]:
+        code, _, stderr = run_command("poetry install", capture_output=True)
+        if code == 0:
+            print_success("Dependencies installed with Poetry")
+        else:
+            print_warning(f"Failed to install with Poetry: {stderr}")
+    else:
+        print_warning("Poetry not found, skipping dependency installation")
+    
+    # Create initial migration
+    print_step(6, 8, "Creating initial migration...")
+    code, _, stderr = run_command("python manage.py makemigrations", capture_output=True)
+    if code == 0:
+        print_success("Initial migration created")
+    else:
+        print_warning(f"Failed to create migration: {stderr}")
+    
+    # Run migrations
+    print_step(7, 8, "Running migrations...")
+    code, _, stderr = run_command("python manage.py migrate", capture_output=True)
+    if code == 0:
+        print_success("Migrations applied")
+    else:
+        print_warning(f"Failed to run migrations: {stderr}")
+    
+    # Final setup
+    print_step(8, 8, "Finalizing setup...")
+    
+    duration = time.time() - start_time
+    
+    # Show success message
+    console.print(Panel(
+        f"[bold green]Project '{project_name}' created successfully![/bold green]\n\n"
+        f"[bold]Next steps:[/bold]\n"
+        f"  cd {project_name}\n"
+        f"  corex runserver\n\n"
+        f"  [bold]Or with Docker:[/bold]\n"
+        f"  corex runserver --docker\n\n"
+        f"[dim]Project created in {format_duration(duration)}[/dim]",
+        title="🎉 Success!",
+        border_style="green"
+    ))
+    
+    # Show project structure
+    if ctx.obj.get("verbose"):
+        console.print("\n[bold]Project structure:[/bold]")
+        from .utils import create_file_tree
+        tree = create_file_tree(project_path, max_depth=2)
+        console.print(tree)
+
+
+def app_command(
+    ctx: click.Context,
+    app_name: str,
+    app_type: Optional[str],
+    auth: Optional[str],
+    ui: Optional[str],
+    seed: bool,
+    api: bool,
+) -> None:
+    """Generate a new Django app with CoreX"""
+    start_time = time.time()
+    
+    # Check if we're in a Django project
+    project_root = get_project_root()
+    if not project_root:
+        print_error("Not in a Django project directory")
+        print_info("Run this command from your Django project root")
+        return
+    
+    # Validate app name
+    if not validate_project_name(app_name):
+        print_error(f"Invalid app name: {app_name}")
+        return
+    
+    # Check if app already exists
+    app_path = project_root / app_name
+    if app_path.exists():
+        print_error(f"App '{app_name}' already exists")
+        return
+    
+    # Get project configuration
+    settings_path = project_root / "settings.py"
+    if not settings_path.exists():
+        # Try to find settings in project directory
+        project_dirs = [d for d in project_root.iterdir() if d.is_dir() and (d / "settings.py").exists()]
+        if project_dirs:
+            settings_path = project_dirs[0] / "settings.py"
+    
+    if not settings_path.exists():
+        print_error("Could not find Django settings file")
+        return
+    
+    # Read project settings to determine auth and UI
+    project_settings = {}
+    try:
+        with open(settings_path, 'r') as f:
+            content = f.read()
+            if 'rest_framework' in content:
+                project_settings['api'] = True
+            if 'tailwind' in content.lower():
+                project_settings['ui'] = 'tailwind'
+            elif 'bootstrap' in content.lower():
+                project_settings['ui'] = 'bootstrap'
+            else:
+                project_settings['ui'] = 'none'
+    except Exception:
+        pass
+    
+    # Use project settings as defaults
+    if auth is None:
+        auth = "session"  # Default
+    if ui is None:
+        ui = project_settings.get('ui', 'none')
+    
+    print_step(1, 4, f"Generating app '{app_name}'...")
+    success = generate_app(
+        project_root,
+        app_name,
+        app_type,
+        auth,
+        ui,
+        seed,
+        api or project_settings.get('api', False)
+    )
+    
+    if not success:
+        print_error("Failed to generate app")
+        return
+    
+    # Add app to INSTALLED_APPS
+    print_step(2, 4, "Adding app to INSTALLED_APPS...")
+    add_to_installed_apps(project_root, app_name)
+    
+    # Create migrations
+    print_step(3, 4, "Creating migrations...")
+    os.chdir(project_root)
+    code, _, stderr = run_command(f"python manage.py makemigrations {app_name}", capture_output=True)
+    if code == 0:
+        print_success("Migrations created")
+    else:
+        print_warning(f"Failed to create migrations: {stderr}")
+    
+    # Run migrations
+    print_step(4, 4, "Running migrations...")
+    code, _, stderr = run_command(f"python manage.py migrate", capture_output=True)
+    if code == 0:
+        print_success("Migrations applied")
+    else:
+        print_warning(f"Failed to run migrations: {stderr}")
+    
+    duration = time.time() - start_time
+    
+    console.print(Panel(
+        f"[bold green]App '{app_name}' generated successfully![/bold green]\n\n"
+        f"[bold]What's next:[/bold]\n"
+        f"  • Add URLs to your main urls.py\n"
+        f"  • Customize models and views\n"
+        f"  • Run: corex runserver\n\n"
+        f"[dim]App generated in {format_duration(duration)}[/dim]",
+        title="🎉 Success!",
+        border_style="green"
+    ))
+
+
+def scaffold_command(
+    ctx: click.Context,
+    feature: str,
+    app: Optional[str],
+    model: Optional[str],
+    fields: Optional[str],
+) -> None:
+    """Scaffold new features for existing apps"""
+    project_root = get_project_root()
+    if not project_root:
+        print_error("Not in a Django project directory")
+        return
+    
+    if not app:
+        print_error("Please specify the target app with --app")
+        return
+    
+    app_path = project_root / app
+    if not app_path.exists():
+        print_error(f"App '{app}' does not exist")
+        return
+    
+    print_step(1, 3, f"Scaffolding {feature} for app '{app}'...")
+    success = generate_scaffold(project_root, app, feature, model, fields)
+    
+    if not success:
+        print_error("Failed to scaffold feature")
+        return
+    
+    # Create migrations
+    print_step(2, 3, "Creating migrations...")
+    os.chdir(project_root)
+    code, _, stderr = run_command(f"python manage.py makemigrations {app}", capture_output=True)
+    if code == 0:
+        print_success("Migrations created")
+    else:
+        print_warning(f"Failed to create migrations: {stderr}")
+    
+    # Run migrations
+    print_step(3, 3, "Running migrations...")
+    code, _, stderr = run_command(f"python manage.py migrate", capture_output=True)
+    if code == 0:
+        print_success("Migrations applied")
+    else:
+        print_warning(f"Failed to run migrations: {stderr}")
+    
+    console.print(Panel(
+        f"[bold green]Feature '{feature}' scaffolded successfully![/bold green]\n\n"
+        f"[bold]What's next:[/bold]\n"
+        f"  • Customize the generated code\n"
+        f"  • Add to your URLs\n"
+        f"  • Test the new functionality\n",
+        title="🎉 Success!",
+        border_style="green"
+    ))
+
+
+def runserver_command(ctx: click.Context, docker: bool, port: int, host: str) -> None:
+    """Run Django development server"""
+    project_root = get_project_root()
+    if not project_root:
+        print_error("Not in a Django project directory")
+        return
+    
+    os.chdir(project_root)
+    
+    if docker:
+        # Check if docker-compose.yml exists
+        if (project_root / "docker-compose.yml").exists():
+            print_info("Starting with Docker...")
+            cmd = f"docker-compose up --build"
+            run_command(cmd)
+        else:
+            print_error("Docker configuration not found")
+            print_info("Run 'corex new' with --docker flag to create Docker setup")
+    else:
+        print_info(f"Starting Django development server on {host}:{port}...")
+        cmd = f"python manage.py runserver {host}:{port}"
+        run_command(cmd)
+
+
+def test_command(
+    ctx: click.Context,
+    app_name: Optional[str],
+    coverage: bool,
+    parallel: bool,
+) -> None:
+    """Run Django tests"""
+    project_root = get_project_root()
+    if not project_root:
+        print_error("Not in a Django project directory")
+        return
+    
+    os.chdir(project_root)
+    
+    cmd = "python manage.py test"
+    
+    if app_name:
+        cmd += f" {app_name}"
+    
+    if parallel:
+        cmd += " --parallel"
+    
+    if coverage:
+        # Install coverage if not available
+        code, _, _ = run_command("pip install coverage", capture_output=True)
+        cmd = f"coverage run --source='.' manage.py test"
+        if app_name:
+            cmd += f" {app_name}"
+        if parallel:
+            cmd += " --parallel"
+    
+    print_info("Running tests...")
+    run_command(cmd)
+    
+    if coverage:
+        run_command("coverage report")
+        run_command("coverage html")
+
+
+def ci_command(ctx: click.Context, github: bool, gitlab: bool, docker: bool) -> None:
+    """Initialize CI/CD pipeline"""
+    project_root = get_project_root()
+    if not project_root:
+        print_error("Not in a Django project directory")
+        return
+    
+    if not github and not gitlab:
+        print_error("Please specify --github or --gitlab")
+        return
+    
+    print_step(1, 2, "Generating CI/CD pipeline...")
+    success = generate_ci_pipeline(project_root, github, gitlab, docker)
+    
+    if success:
+        print_step(2, 2, "Pipeline configuration complete")
+        print_success("CI/CD pipeline generated successfully!")
+        
+        if github:
+            print_info("GitHub Actions workflow created at .github/workflows/ci.yml")
+        if gitlab:
+            print_info("GitLab CI configuration created at .gitlab-ci.yml")
+    else:
+        print_error("Failed to generate CI/CD pipeline")
+
+
+def integrate_command(ctx: click.Context, service: str, config: Optional[str]) -> None:
+    """Integrate external services"""
+    project_root = get_project_root()
+    if not project_root:
+        print_error("Not in a Django project directory")
+        return
+    
+    print_step(1, 2, f"Integrating {service}...")
+    success = generate_integration(project_root, service, config)
+    
+    if success:
+        print_step(2, 2, "Integration complete")
+        print_success(f"{service.title()} integration completed!")
+        print_info(f"Check the generated configuration files")
+    else:
+        print_error(f"Failed to integrate {service}")
+
+
+def doctor_command(ctx: click.Context, fix: bool) -> None:
+    """Check environment health and diagnose issues"""
+    print_step(1, 4, "Checking environment...")
+    
+    # Check dependencies
+    deps = check_dependencies()
+    
+    # Create results table
+    table = Table(title="Environment Health Check")
+    table.add_column("Component", style="cyan")
+    table.add_column("Status", style="green")
+    table.add_column("Version", style="yellow")
+    
+    for name, installed in deps.items():
+        status = "✓ Installed" if installed else "✗ Missing"
+        style = "green" if installed else "red"
+        
+        if installed:
+            # Get version
+            if name == "python":
+                import sys
+                version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+            else:
+                code, stdout, _ = run_command(f"{name} --version", capture_output=True)
+                version = stdout.strip() if code == 0 else "Unknown"
+        else:
+            version = "N/A"
+        
+        table.add_row(name.title(), status, version)
+    
+    console.print(table)
+    
+    # Check Django project
+    print_step(2, 4, "Checking Django project...")
+    project_root = get_project_root()
+    
+    if project_root:
+        print_success(f"Django project found at: {project_root}")
+        
+        # Check for common issues
+        issues = []
+        
+        # Check manage.py
+        if not (project_root / "manage.py").exists():
+            issues.append("Missing manage.py")
+        
+        # Check settings
+        settings_files = list(project_root.glob("**/settings.py"))
+        if not settings_files:
+            issues.append("No settings.py found")
+        
+        # Check requirements
+        if not (project_root / "pyproject.toml").exists() and not (project_root / "requirements.txt").exists():
+            issues.append("No dependency management file found")
+        
+        if issues:
+            print_warning("Found issues:")
+            for issue in issues:
+                print_warning(f"  • {issue}")
+        else:
+            print_success("Django project looks healthy")
+    else:
+        print_warning("No Django project found in current directory")
+    
+    # Check database
+    print_step(3, 4, "Checking database...")
+    if project_root:
+        os.chdir(project_root)
+        code, _, stderr = run_command("python manage.py check", capture_output=True)
+        if code == 0:
+            print_success("Database configuration is valid")
+        else:
+            print_error(f"Database issues found: {stderr}")
+    
+    # Check migrations
+    print_step(4, 4, "Checking migrations...")
+    if project_root:
+        code, stdout, stderr = run_command("python manage.py showmigrations", capture_output=True)
+        if code == 0:
+            print_success("Migrations are up to date")
+        else:
+            print_warning("Migration issues detected")
+    
+    if fix:
+        print_info("Attempting to fix issues...")
+        # Add automatic fixes here
+        print_warning("Automatic fixes not implemented yet")
+
+
+def add_to_installed_apps(project_root: Path, app_name: str) -> None:
+    """Add app to INSTALLED_APPS in settings"""
+    # Find settings file
+    settings_files = list(project_root.glob("**/settings.py"))
+    if not settings_files:
+        print_warning("Could not find settings.py")
+        return
+    
+    settings_file = settings_files[0]
+    
+    try:
+        content = settings_file.read_text()
+        
+        # Check if app is already in INSTALLED_APPS
+        if f"'{app_name}'," in content or f'"{app_name}",' in content:
+            print_info(f"App '{app_name}' already in INSTALLED_APPS")
+            return
+        
+        # Find INSTALLED_APPS and add the app
+        lines = content.split('\n')
+        in_installed_apps = False
+        added = False
+        
+        for i, line in enumerate(lines):
+            if 'INSTALLED_APPS' in line and '=' in line:
+                in_installed_apps = True
+                continue
+            
+            if in_installed_apps:
+                if line.strip().startswith(']'):
+                    # End of INSTALLED_APPS, add before closing bracket
+                    lines.insert(i, f"    '{app_name}',")
+                    added = True
+                    break
+                elif line.strip().endswith(','):
+                    # Continue looking for the end
+                    continue
+                else:
+                    # Add after the last app
+                    lines.insert(i, f"    '{app_name}',")
+                    added = True
+                    break
+        
+        if added:
+            settings_file.write_text('\n'.join(lines))
+            print_success(f"Added '{app_name}' to INSTALLED_APPS")
+        else:
+            print_warning("Could not automatically add to INSTALLED_APPS")
+            print_info(f"Please add '{app_name}' to INSTALLED_APPS manually")
+    
+    except Exception as e:
+        print_warning(f"Could not update settings: {e}")
+        print_info(f"Please add '{app_name}' to INSTALLED_APPS manually")

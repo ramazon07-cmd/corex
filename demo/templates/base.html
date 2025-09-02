@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>demo</title>
+    
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6B7280',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-800">
+                        demo
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="/login/" class="text-gray-600 hover:text-gray-900">
+                        Login
+                    </a>
+                    <a href="/register/" class="text-gray-600 hover:text-gray-900">
+                        Register
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Messages will be handled by Django -->
+        <!-- Django messages will be displayed here -->
+
+        
+        <div class="text-center py-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                Welcome to demo
+            </h1>
+            <p class="text-lg text-gray-600">
+                Your Django project is ready! Start building amazing applications.
+            </p>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p>&copy; 2024 demo. Generated with CoreX.</p>
+            </div>
+        </div>
+    </footer>
+
+    
+    
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+    
+    
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ project_name }}{% endblock %}</title>
+    
+    {% if ui == 'tailwind' %}
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6B7280',
+                    }
+                }
+            }
+        }
+    </script>
+    {% elif ui == 'bootstrap' %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% endif %}
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if ui == 'tailwind' %}bg-gray-50{% endif %}">
+    <!-- Navigation -->
+    <nav class="{% if ui == 'tailwind' %}bg-white shadow-lg{% elif ui == 'bootstrap' %}navbar navbar-expand-lg navbar-light bg-light{% endif %}">
+        <div class="{% if ui == 'tailwind' %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8{% elif ui == 'bootstrap' %}container{% endif %}">
+            <div class="{% if ui == 'tailwind' %}flex justify-between h-16{% elif ui == 'bootstrap' %}navbar-nav{% endif %}">
+                <div class="{% if ui == 'tailwind' %}flex items-center{% endif %}">
+                    <a href="/" class="{% if ui == 'tailwind' %}text-xl font-bold text-gray-800{% elif ui == 'bootstrap' %}navbar-brand{% endif %}">
+                        {{ project_name }}
+                    </a>
+                </div>
+                
+                <div class="{% if ui == 'tailwind' %}flex items-center space-x-4{% elif ui == 'bootstrap' %}navbar-nav ms-auto{% endif %}">
+                    <a href="/login/" class="{% if ui == 'tailwind' %}text-gray-600 hover:text-gray-900{% elif ui == 'bootstrap' %}nav-link{% endif %}">
+                        Login
+                    </a>
+                    <a href="/register/" class="{% if ui == 'tailwind' %}text-gray-600 hover:text-gray-900{% elif ui == 'bootstrap' %}nav-link{% endif %}">
+                        Register
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="{% if ui == 'tailwind' %}max-w-7xl mx-auto py-6 sm:px-6 lg:px-8{% elif ui == 'bootstrap' %}container mt-4{% endif %}">
+        <!-- Messages will be handled by Django -->
+        <!-- Django messages will be displayed here -->
+
+        {% block content %}
+        <div class="{% if ui == 'tailwind' %}text-center py-12{% elif ui == 'bootstrap' %}text-center py-5{% endif %}">
+            <h1 class="{% if ui == 'tailwind' %}text-4xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}display-4 mb-4{% endif %}">
+                Welcome to {{ project_name }}
+            </h1>
+            <p class="{% if ui == 'tailwind' %}text-lg text-gray-600{% elif ui == 'bootstrap' %}lead{% endif %}">
+                Your Django project is ready! Start building amazing applications.
+            </p>
+        </div>
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="{% if ui == 'tailwind' %}bg-gray-800 text-white py-8 mt-12{% elif ui == 'bootstrap' %}bg-dark text-white py-4 mt-5{% endif %}">
+        <div class="{% if ui == 'tailwind' %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8{% elif ui == 'bootstrap' %}container{% endif %}">
+            <div class="{% if ui == 'tailwind' %}text-center{% endif %}">
+                <p>&copy; 2024 {{ project_name }}. Generated with CoreX.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% if ui == 'bootstrap' %}
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% endif %}
+    
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

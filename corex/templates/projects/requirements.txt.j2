@@ -1,0 +1,43 @@
+# Django and Core Dependencies
+Django>=4.2.0
+python-dotenv>=1.0.0
+
+# Database Drivers
+{% if database == 'postgres' %}
+psycopg2-binary>=2.9.0
+{% elif database == 'mysql' %}
+mysqlclient>=2.1.0
+{% endif %}
+
+# Authentication
+{% if auth == 'allauth' %}
+django-allauth>=0.54.0
+{% endif %}
+
+# API Framework
+{% if api %}
+djangorestframework>=3.14.0
+django-cors-headers>=4.0.0
+{% endif %}
+
+# JWT Authentication
+{% if auth == 'jwt' %}
+djangorestframework-simplejwt>=5.2.0
+{% endif %}
+
+# UI Framework
+{% if ui == 'tailwind' %}
+django-tailwind>=3.6.0
+{% endif %}
+
+# Development Dependencies
+pytest>=7.4.0
+pytest-django>=4.5.0
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+coverage>=7.2.0
+
+# Production Dependencies
+gunicorn>=21.0.0
+whitenoise>=6.5.0

@@ -1,0 +1,45 @@
+{% raw %}{% extends "base.html" %}{% endraw %}
+
+{% block title %}{{ app_name|title }} - Items{% endblock %}
+
+{% block content %}
+<div class="{% if ui == 'tailwind' %}max-w-7xl mx-auto{% elif ui == 'bootstrap' %}container{% endif %}">
+    <div class="{% if ui == 'tailwind' %}flex justify-between items-center mb-6{% elif ui == 'bootstrap' %}d-flex justify-content-between align-items-center mb-4{% endif %}">
+        <h1 class="{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900{% elif ui == 'bootstrap' %}h2{% endif %}">
+            {{ app_name|title }} Items
+        </h1>
+        <a href="/{{ app_name }}/create/" 
+           class="{% if ui == 'tailwind' %}bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg{% elif ui == 'bootstrap' %}btn btn-primary{% endif %}">
+            Create New Item
+        </a>
+    </div>
+
+    {% if items %}
+        <div class="{% if ui == 'tailwind' %}grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6{% elif ui == 'bootstrap' %}row{% endif %}">
+            {% for item in items %}
+                <div class="{% if ui == 'tailwind' %}bg-white rounded-lg shadow-md p-6{% elif ui == 'bootstrap' %}col-md-4 mb-4{% endif %}">
+                    <h3 class="{% if ui == 'tailwind' %}text-xl font-semibold text-gray-900 mb-2{% elif ui == 'bootstrap' %}h5{% endif %}">
+                        <a href="/{{ app_name }}/{{ item.pk }}/" 
+                           class="{% if ui == 'tailwind' %}text-primary-600 hover:text-primary-800{% elif ui == 'bootstrap' %}text-decoration-none{% endif %}">
+                            {{ item.title }}
+                        </a>
+                    </h3>
+                    <p class="{% if ui == 'tailwind' %}text-gray-600 mb-4{% elif ui == 'bootstrap' %}text-muted{% endif %}">
+                        {{ item.description }}
+                    </p>
+                    <div class="{% if ui == 'tailwind' %}flex justify-between items-center text-sm text-gray-500{% elif ui == 'bootstrap' %}small text-muted{% endif %}">
+                        <span>By {{ item.author.username }}</span>
+                        <span>{{ item.created_at }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="{% if ui == 'tailwind' %}text-center py-12{% elif ui == 'bootstrap' %}text-center py-5{% endif %}">
+            <p class="{% if ui == 'tailwind' %}text-gray-500 text-lg{% elif ui == 'bootstrap' %}lead{% endif %}">
+                No items found. Create your first item!
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

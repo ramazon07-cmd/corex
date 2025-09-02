@@ -1,0 +1,16 @@
+{% raw %}{% extends "base.html" %}{% endraw %}
+
+{% raw %}{% block title %}{% endraw %}{{ app_name|title }}{% raw %} - Delete{% endblock %}{% endraw %}
+
+{% raw %}{% block content %}
+<div class="{% endraw %}{% if ui == 'tailwind' %}max-w-xl mx-auto{% elif ui == 'bootstrap' %}container{% endif %}{% raw %}">
+    <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-2xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h3 mb-3{% endif %}{% raw %}">Confirm delete</h1>
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="{% endraw %}{% if ui == 'tailwind' %}btn-primary{% elif ui == 'bootstrap' %}btn btn-danger{% endif %}{% raw %}">Yes, delete</button>
+        <a href="/{{ app_name }}/" class="{% endraw %}{% if ui == 'tailwind' %}text-gray-600 ml-4{% elif ui == 'bootstrap' %}btn btn-secondary ms-2{% endif %}{% raw %}">Cancel</a>
+    </form>
+</div>
+{% endblock %}{% endraw %}
+
