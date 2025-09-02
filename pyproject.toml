@@ -1,11 +1,36 @@
 [tool.poetry]
 name = "corex"
-version = "0.1.0"
+version = "1.0.0"
 description = "A comprehensive Django scaffolding framework for rapid application development"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["CoreX Team <hello@corex.dev>"]
 readme = "README.md"
 packages = [{include = "corex"}]
 license = "MIT"
+homepage = "https://github.com/yourusername/corex"
+repository = "https://github.com/yourusername/corex"
+documentation = "https://corex.readthedocs.io"
+keywords = ["django", "scaffolding", "framework", "boilerplate", "code-generation"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Build Tools",
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -16,7 +41,7 @@ requests = "^2.31.0"
 colorama = "^0.4.6"
 rich = "^13.7.0"
 python-dotenv = "^1.0.0"
-pathlib2 = "^2.3.7"
+typing-extensions = "^4.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -24,6 +49,9 @@ black = "^23.11.0"
 isort = "^5.12.0"
 flake8 = "^6.1.0"
 mypy = "^1.7.1"
+coverage = "^7.3.0"
+twine = "^4.0.2"
+build = "^1.0.3"
 
 [tool.poetry.scripts]
 corex = "corex.cli:main"

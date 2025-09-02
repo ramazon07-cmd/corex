@@ -1,0 +1,20 @@
+# Stripe Integration Settings
+# Add to your Django settings.py
+
+# Stripe Configuration
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+# Add 'stripe' to INSTALLED_APPS if using django-stripe
+INSTALLED_APPS += [
+    # 'stripe',  # Uncomment if using django-stripe package
+]
+
+# Stripe Settings
+STRIPE_LIVE_MODE = not DEBUG  # Change to True in production
+STRIPE_CURRENCY = 'usd'
+
+# Payment Settings
+PAYMENT_SUCCESS_URL = '/payments/success/'
+PAYMENT_CANCEL_URL = '/payments/cancel/'

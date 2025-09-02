@@ -20,6 +20,7 @@ from .commands import (
     new_command,
     runserver_command,
     scaffold_command,
+    seed_command,
     test_command,
 )
 from .utils import get_project_root
@@ -28,7 +29,7 @@ console = Console()
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="CoreX")
+@click.version_option(version="1.0.0", prog_name="CoreX")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.pass_context
 def main(ctx: click.Context, verbose: bool) -> None:
@@ -181,19 +182,7 @@ def doctor(ctx: click.Context, fix: bool) -> None:
 @click.pass_context
 def seed(ctx: click.Context, app: Optional[str], count: int) -> None:
     """Generate demo data for apps"""
-    project_root = get_project_root()
-    if not project_root:
-        console.print("[red]Error:[/red] Not in a Django project directory")
-        sys.exit(1)
-    
-    os.chdir(project_root)
-    cmd = f"python manage.py seed"
-    if app:
-        cmd += f" --app {app}"
-    cmd += f" --count {count}"
-    
-    console.print(f"[green]Running:[/green] {cmd}")
-    os.system(cmd)
+    seed_command(ctx, app, count)
 
 
 if __name__ == "__main__":

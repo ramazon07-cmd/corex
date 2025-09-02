@@ -1,45 +1,199 @@
-{% raw %}{% extends "base.html" %}{% endraw %}
+{% raw %}{% extends "base.html" %}
 
-{% block title %}{{ app_name|title }} - Items{% endblock %}
+{% block title %}{% endraw %}{{ app_name|title }}{% raw %} - List{% endblock %}
 
 {% block content %}
-<div class="{% if ui == 'tailwind' %}max-w-7xl mx-auto{% elif ui == 'bootstrap' %}container{% endif %}">
-    <div class="{% if ui == 'tailwind' %}flex justify-between items-center mb-6{% elif ui == 'bootstrap' %}d-flex justify-content-between align-items-center mb-4{% endif %}">
-        <h1 class="{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900{% elif ui == 'bootstrap' %}h2{% endif %}">
-            {{ app_name|title }} Items
+{% endraw %}{% if ui == 'tailwind' %}{% raw %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+            {% endraw %}{% if app_type == 'blog' %}{% raw %}Posts
+            {% endraw %}{% elif app_type == 'shop' %}{% raw %}Products
+            {% endraw %}{% elif app_type == 'wiki' %}{% raw %}Pages
+            {% endraw %}{% elif app_type == 'crm' %}{% raw %}Contacts
+            {% endraw %}{% elif app_type == 'social' %}{% raw %}Feed
+            {% endraw %}{% elif app_type == 'forum' %}{% raw %}Topics
+            {% endraw %}{% else %}{% raw %}{% endraw %}{{ app_name|title }}{% raw %} Items
+            {% endraw %}{% endif %}{% raw %}
         </h1>
-        <a href="/{{ app_name }}/create/" 
-           class="{% if ui == 'tailwind' %}bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg{% elif ui == 'bootstrap' %}btn btn-primary{% endif %}">
-            Create New Item
+        {% endraw %}{% if app_type in ['wiki', 'crm', 'forum'] %}{% raw %}
+        <a href="#" class="btn-primary">
+            {% endraw %}{% if app_type == 'wiki' %}{% raw %}New Page
+            {% endraw %}{% elif app_type == 'crm' %}{% raw %}New Contact
+            {% endraw %}{% elif app_type == 'forum' %}{% raw %}New Topic
+            {% endraw %}{% endif %}{% raw %}
         </a>
+        {% endraw %}{% endif %}{% raw %}
     </div>
 
-    {% if items %}
-        <div class="{% if ui == 'tailwind' %}grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6{% elif ui == 'bootstrap' %}row{% endif %}">
-            {% for item in items %}
-                <div class="{% if ui == 'tailwind' %}bg-white rounded-lg shadow-md p-6{% elif ui == 'bootstrap' %}col-md-4 mb-4{% endif %}">
-                    <h3 class="{% if ui == 'tailwind' %}text-xl font-semibold text-gray-900 mb-2{% elif ui == 'bootstrap' %}h5{% endif %}">
-                        <a href="/{{ app_name }}/{{ item.pk }}/" 
-                           class="{% if ui == 'tailwind' %}text-primary-600 hover:text-primary-800{% elif ui == 'bootstrap' %}text-decoration-none{% endif %}">
-                            {{ item.title }}
+    <div class="grid gap-6">
+        {% for item in page_obj %}
+        <div class="card">
+            {% endraw %}{% if app_type == 'blog' %}{% raw %}
+            <h2 class="text-xl font-semibold mb-2">
+                <a href="{{ item.get_absolute_url }}" class="text-blue-600 hover:text-blue-800">
+                    {{ item.title }}
+                </a>
+            </h2>
+            <p class="text-gray-600 mb-2">{{ item.excerpt|default:item.content|truncatewords:30 }}</p>
+            <div class="text-sm text-gray-500">
+                By {{ item.author.username }} • {{ item.publish|date:"M d, Y" }}
+                • <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ item.category.name }}</span>
+            </div>
+            {% endraw %}{% elif app_type == 'shop' %}{% raw %}
+            <div class="flex items-center space-x-4">
+                {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-16 h-16 object-cover rounded">
+                {% endif %}
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold">
+                        <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:product_detail' item.slug %}" class="text-blue-600 hover:text-blue-800">
+                            {{ item.name }}
                         </a>
                     </h3>
-                    <p class="{% if ui == 'tailwind' %}text-gray-600 mb-4{% elif ui == 'bootstrap' %}text-muted{% endif %}">
-                        {{ item.description }}
-                    </p>
-                    <div class="{% if ui == 'tailwind' %}flex justify-between items-center text-sm text-gray-500{% elif ui == 'bootstrap' %}small text-muted{% endif %}">
-                        <span>By {{ item.author.username }}</span>
-                        <span>{{ item.created_at }}</span>
-                    </div>
+                    <p class="text-gray-600">{{ item.description|truncatewords:20 }}</p>
+                    <p class="text-xl font-bold text-green-600">${{ item.display_price }}</p>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="{% if ui == 'tailwind' %}text-center py-12{% elif ui == 'bootstrap' %}text-center py-5{% endif %}">
-            <p class="{% if ui == 'tailwind' %}text-gray-500 text-lg{% elif ui == 'bootstrap' %}lead{% endif %}">
-                No items found. Create your first item!
+            </div>
+            {% endraw %}{% elif app_type == 'wiki' %}{% raw %}
+            <h3 class="text-lg font-semibold mb-2">
+                <a href="{{ item.get_absolute_url }}" class="text-blue-600 hover:text-blue-800">
+                    {{ item.title }}
+                </a>
+            </h3>
+            <p class="text-gray-600">Last updated {{ item.updated_at|date:"M d, Y" }} by {{ item.author.username }}</p>
+            {% endraw %}{% elif app_type == 'crm' %}{% raw %}
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold">{{ item.full_name }}</h3>
+                    <p class="text-gray-600">{{ item.email }}</p>
+                    {% if item.company %}<p class="text-sm text-gray-500">{{ item.company }}</p>{% endif %}
+                </div>
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">{{ item.get_contact_type_display }}</span>
+            </div>
+            {% endraw %}{% elif app_type == 'social' %}{% raw %}
+            <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    {{ item.author.username|first|upper }}
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="font-semibold">{{ item.author.username }}</span>
+                        <span class="text-sm text-gray-500">{{ item.created_at|timesince }} ago</span>
+                    </div>
+                    <p>{{ item.content }}</p>
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="Post image" class="mt-2 rounded max-w-full h-auto">
+                    {% endif %}
+                </div>
+            </div>
+            {% endraw %}{% elif app_type == 'forum' %}{% raw %}
+            <h3 class="text-lg font-semibold mb-2">
+                <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:topic_detail' item.id %}" class="text-blue-600 hover:text-blue-800">
+                    {{ item.title }}
+                </a>
+            </h3>
+            <p class="text-sm text-gray-600">
+                Started by {{ item.author.username }} • {{ item.created_at|date:"M d, Y" }}
+                • {{ item.posts.count }} posts
             </p>
+            {% endraw %}{% else %}{% raw %}
+            <h3 class="text-lg font-semibold mb-2">{{ item.name }}</h3>
+            <p class="text-gray-600">{{ item.description|truncatewords:20 }}</p>
+            <p class="text-sm text-gray-500">Created {{ item.created_at|date:"M d, Y" }}</p>
+            {% endraw %}{% endif %}{% raw %}
         </div>
+        {% empty %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No items found.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mt-8 flex justify-center">
+        <nav class="flex space-x-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-2 border border-blue-500 bg-blue-500 text-white rounded">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50">Next</a>
+            {% endif %}
+        </nav>
+    </div>
     {% endif %}
 </div>
+
+{% endraw %}{% elif ui == 'bootstrap' %}{% raw %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            {% endraw %}{% if app_type == 'blog' %}{% raw %}Posts
+            {% endraw %}{% elif app_type == 'shop' %}{% raw %}Products
+            {% endraw %}{% elif app_type == 'wiki' %}{% raw %}Pages
+            {% endraw %}{% elif app_type == 'crm' %}{% raw %}Contacts
+            {% endraw %}{% elif app_type == 'social' %}{% raw %}Feed
+            {% endraw %}{% elif app_type == 'forum' %}{% raw %}Topics
+            {% endraw %}{% else %}{% raw %}{% endraw %}{{ app_name|title }}{% raw %} Items
+            {% endraw %}{% endif %}{% raw %}
+        </h1>
+        {% endraw %}{% if app_type in ['wiki', 'crm', 'forum'] %}{% raw %}
+        <a href="#" class="btn btn-primary">
+            {% endraw %}{% if app_type == 'wiki' %}{% raw %}New Page
+            {% endraw %}{% elif app_type == 'crm' %}{% raw %}New Contact
+            {% endraw %}{% elif app_type == 'forum' %}{% raw %}New Topic
+            {% endraw %}{% endif %}{% raw %}
+        </a>
+        {% endraw %}{% endif %}{% raw %}
+    </div>
+
+    {% for item in page_obj %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.name }}</h5>
+            <p class="card-text">{{ item.description|truncatewords:20 }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-5">
+        <p class="text-muted">No items found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endraw %}{% else %}{% raw %}
+<!-- Plain HTML version -->
+<div>
+    <h1>
+        {% endraw %}{% if app_type == 'blog' %}{% raw %}Posts
+        {% endraw %}{% elif app_type == 'shop' %}{% raw %}Products
+        {% endraw %}{% elif app_type == 'wiki' %}{% raw %}Pages
+        {% endraw %}{% elif app_type == 'crm' %}{% raw %}Contacts
+        {% endraw %}{% elif app_type == 'social' %}{% raw %}Feed
+        {% endraw %}{% elif app_type == 'forum' %}{% raw %}Topics
+        {% endraw %}{% else %}{% raw %}{% endraw %}{{ app_name|title }}{% raw %} Items
+        {% endraw %}{% endif %}{% raw %}
+    </h1>
+
+    {% for item in page_obj %}
+    <div style="border: 1px solid #ddd; margin: 10px 0; padding: 15px;">
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.description }}</p>
+    </div>
+    {% empty %}
+    <p>No items found.</p>
+    {% endfor %}
+</div>
+{% endraw %}{% endif %}{% raw %}
 {% endblock %}
+{% endraw %}

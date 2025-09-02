@@ -1,0 +1,117 @@
+image: python:{{ python_version }}
+
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  POETRY_CACHE_DIR: "$CI_PROJECT_DIR/.cache/poetry"
+
+cache:
+  paths:
+    - .cache/pip
+    - .cache/poetry
+    - .venv/
+
+before_script:
+  - apt-get update -qq && apt-get install -y -qq git
+  - pip install poetry
+  - poetry config virtualenvs.in-project true
+  - poetry install
+
+# Services
+services:
+  {% if database == 'postgres' %}
+  - postgres:15
+  {% elif database == 'mysql' %}
+  - mysql:8.0
+  {% endif %}
+  - redis:7-alpine
+
+# Environment variables
+variables:
+  {% if database == 'postgres' %}
+  POSTGRES_DB: test_db
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  DB_HOST: postgres
+  DB_NAME: test_db
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  {% elif database == 'mysql' %}
+  MYSQL_DATABASE: test_db
+  MYSQL_ROOT_PASSWORD: password
+  DB_HOST: mysql
+  DB_NAME: test_db
+  DB_USER: root
+  DB_PASSWORD: password
+  {% endif %}
+  REDIS_URL: redis://redis:6379/0
+  SECRET_KEY: test-secret-key
+  DEBUG: "False"
+
+# Test Stage
+test:
+  stage: test
+  script:
+    # Linting
+    - poetry run flake8 .
+    - poetry run black --check .
+    - poetry run isort --check-only .
+    
+    # Testing
+    - poetry run python manage.py migrate
+    - poetry run coverage run manage.py test
+    - poetry run coverage report
+    - poetry run coverage xml
+  
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.xml
+  
+  coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+
+{% if docker %}
+# Build Stage
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:latest
+  
+  only:
+    - main
+{% endif %}
+
+# Deploy Stage
+deploy:
+  stage: deploy
+  script:
+    - echo "Add your deployment script here"
+    # Example deployment commands:
+    # - ssh user@server "cd /path/to/app && git pull && poetry install && python manage.py migrate && sudo systemctl restart app"
+  
+  only:
+    - main
+  
+  when: manual
+
+# Security scanning
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml

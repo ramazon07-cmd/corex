@@ -78,7 +78,6 @@ def generate_project(
 
 def generate_project_structure(project_path: Path, context: Dict, env: Environment) -> None:
     """Generate basic project structure"""
-    # Create main project directory
     project_name = context["project_name"]
     main_project_dir = project_path / project_name
     create_directory(main_project_dir)
@@ -104,16 +103,15 @@ def generate_project_structure(project_path: Path, context: Dict, env: Environme
     # Create __init__.py files
     (main_project_dir / "__init__.py").touch()
     
-    # Create apps directory
-    apps_dir = project_path / "apps"
-    create_directory(apps_dir)
-    (apps_dir / "__init__.py").touch()
-    
     # Create static and media directories
     static_dir = project_path / "static"
     media_dir = project_path / "media"
     create_directory(static_dir)
     create_directory(media_dir)
+    
+    # Create CSS directory
+    css_dir = static_dir / "css"
+    create_directory(css_dir)
     
     # Create templates directory
     templates_dir = project_path / "templates"
@@ -123,6 +121,11 @@ def generate_project_structure(project_path: Path, context: Dict, env: Environme
     base_template = env.get_template("base.html.j2")
     base_content = base_template.render(**context)
     (templates_dir / "base.html").write_text(base_content)
+    
+    # Create logs directory
+    logs_dir = project_path / "logs"
+    create_directory(logs_dir)
+    (logs_dir / ".gitkeep").touch()
 
 
 def generate_config_files(project_path: Path, context: Dict, env: Environment) -> None:
@@ -172,22 +175,35 @@ def generate_ui_files(project_path: Path, context: Dict, env: Environment) -> No
         tailwind_files = [
             "tailwind.config.js",
             "package.json",
-            "postcss.config.js",
         ]
         
         for filename in tailwind_files:
-            template = env.get_template(f"tailwind/{filename}.j2")
+            template = env.get_template(f"ui/tailwind/{filename}.j2")
             content = template.render(**context)
             (project_path / filename).write_text(content)
         
-        # Create CSS directory
+        # Create CSS directory and input file
         css_dir = project_path / "static" / "css"
         create_directory(css_dir)
         
         # Generate main CSS file
-        css_template = env.get_template("tailwind/input.css.j2")
+        css_template = env.get_template("ui/tailwind/input.css.j2")
         css_content = css_template.render(**context)
         (css_dir / "input.css").write_text(css_content)
+        
+        # Create theme app for django-tailwind
+        theme_dir = project_path / "theme"
+        create_directory(theme_dir)
+        (theme_dir / "__init__.py").touch()
+        
+        # Create theme apps.py
+        theme_apps_content = f"""from django.apps import AppConfig
+
+class ThemeConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'theme'
+"""
+        (theme_dir / "apps.py").write_text(theme_apps_content)
     
     elif ui == "bootstrap":
         # Generate Bootstrap configuration
@@ -196,9 +212,36 @@ def generate_ui_files(project_path: Path, context: Dict, env: Environment) -> No
         ]
         
         for filename in bootstrap_files:
-            template = env.get_template(f"bootstrap/{filename}.j2")
+            template = env.get_template(f"ui/bootstrap/{filename}.j2")
             content = template.render(**context)
             (project_path / filename).write_text(content)
+            
+        # Create custom CSS file for Bootstrap customization
+        css_dir = project_path / "static" / "css"
+        create_directory(css_dir)
+        bootstrap_css_content = """/* Bootstrap 5 Customizations */
+
+:root {
+  --bs-primary: #007bff;
+  --bs-secondary: #6c757d;
+}
+
+.btn-custom {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: white;
+}
+
+.btn-custom:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+"""
+        (css_dir / "style.css").write_text(bootstrap_css_content)
 
 
 def generate_api_files(project_path: Path, context: Dict, env: Environment) -> None:

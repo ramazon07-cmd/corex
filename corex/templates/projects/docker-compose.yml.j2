@@ -1,82 +1,77 @@
 version: '3.8'
 
 services:
+  {% if database == 'postgres' %}
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: {{ project_name }}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+  {% elif database == 'mysql' %}
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: {{ project_name }}
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql/
+    ports:
+      - "3306:3306"
+  {% endif %}
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     depends_on:
+      {% if database in ['postgres', 'mysql'] %}
       - db
+      {% endif %}
       - redis
     environment:
       - DEBUG=True
-      - DJANGO_SETTINGS_MODULE={{ project_name }}.settings
+      {% if database == 'postgres' %}
+      - DB_HOST=db
+      {% elif database == 'mysql' %}
+      - DB_HOST=db
+      {% endif %}
+      - REDIS_URL=redis://redis:6379/1
 
-  db:
-    {% if database == 'postgres' %}
-    image: postgres:13
+  celery:
+    build: .
+    command: celery -A {{ project_name }} worker -l info
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB={{ project_name }}
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
-    {% elif database == 'mysql' %}
-    image: mysql:8.0
-    volumes:
-      - mysql_data:/var/lib/mysql
-    environment:
-      - MYSQL_DATABASE={{ project_name }}
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=root
-      - MYSQL_ROOT_PASSWORD=root
-    ports:
-      - "3306:3306"
-    {% else %}
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB={{ project_name }}
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
-    {% endif %}
-
-  redis:
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - .:/app
     depends_on:
-      - web
+      {% if database in ['postgres', 'mysql'] %}
+      - db
+      {% endif %}
+      - redis
+    environment:
+      - DEBUG=True
+      {% if database == 'postgres' %}
+      - DB_HOST=db
+      {% elif database == 'mysql' %}
+      - DB_HOST=db
+      {% endif %}
+      - REDIS_URL=redis://redis:6379/1
 
 volumes:
-  {% if database == 'postgres' or database == 'sqlite' %}
+  {% if database == 'postgres' %}
   postgres_data:
   {% elif database == 'mysql' %}
   mysql_data:
   {% endif %}
-  redis_data:
-  static_volume:
-  media_volume:

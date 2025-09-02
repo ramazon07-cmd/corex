@@ -3,90 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ project_name }}{% endblock %}</title>
+    <title>{% raw %}{% block title %}{% endraw %}{{ project_name }}{% raw %}{% endblock %}{% endraw %}</title>
     
     {% if ui == 'tailwind' %}
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3B82F6',
-                        secondary: '#6B7280',
-                    }
-                }
-            }
-        }
-    </script>
+    {% raw %}{% load static tailwind_tags %}
+    {% tailwind_css %}{% endraw %}
     {% elif ui == 'bootstrap' %}
-    <!-- Bootstrap CSS -->
+    {% raw %}{% load static %}{% endraw %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     {% endif %}
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    {% raw %}{% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">{% endraw %}
     
-    {% block extra_css %}{% endblock %}
+    {% raw %}{% block extra_head %}{% endblock %}{% endraw %}
 </head>
-<body class="{% if ui == 'tailwind' %}bg-gray-50{% endif %}">
-    <!-- Navigation -->
-    <nav class="{% if ui == 'tailwind' %}bg-white shadow-lg{% elif ui == 'bootstrap' %}navbar navbar-expand-lg navbar-light bg-light{% endif %}">
-        <div class="{% if ui == 'tailwind' %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8{% elif ui == 'bootstrap' %}container{% endif %}">
-            <div class="{% if ui == 'tailwind' %}flex justify-between h-16{% elif ui == 'bootstrap' %}navbar-nav{% endif %}">
-                <div class="{% if ui == 'tailwind' %}flex items-center{% endif %}">
-                    <a href="/" class="{% if ui == 'tailwind' %}text-xl font-bold text-gray-800{% elif ui == 'bootstrap' %}navbar-brand{% endif %}">
-                        {{ project_name }}
-                    </a>
+<body>
+    {% if ui == 'tailwind' %}
+    <div class="min-h-screen bg-gray-50">
+        <nav class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="/" class="text-xl font-bold text-gray-900">{{ project_name }}</a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        {% raw %}{% if user.is_authenticated %}
+                            <span class="text-gray-700">Hello, {{ user.username }}</span>
+                            <a href="/admin/" class="text-blue-600 hover:text-blue-800">Admin</a>
+                            <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-800">Logout</a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-800">Login</a>
+                        {% endif %}{% endraw %}
+                    </div>
                 </div>
-                
-                <div class="{% if ui == 'tailwind' %}flex items-center space-x-4{% elif ui == 'bootstrap' %}navbar-nav ms-auto{% endif %}">
-                    <a href="/login/" class="{% if ui == 'tailwind' %}text-gray-600 hover:text-gray-900{% elif ui == 'bootstrap' %}nav-link{% endif %}">
-                        Login
-                    </a>
-                    <a href="/register/" class="{% if ui == 'tailwind' %}text-gray-600 hover:text-gray-900{% elif ui == 'bootstrap' %}nav-link{% endif %}">
-                        Register
-                    </a>
+            </div>
+        </nav>
+        
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            {% raw %}{% block content %}{% endraw %}
+            <div class="px-4 py-6 sm:px-0">
+                <div class="border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
+                    <div class="text-center">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to {{ project_name }}</h1>
+                        <p class="text-lg text-gray-600">Your Django project is ready!</p>
+                    </div>
                 </div>
+            </div>
+            {% raw %}{% endblock %}{% endraw %}
+        </main>
+    </div>
+    {% elif ui == 'bootstrap' %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">{{ project_name }}</a>
+            <div class="navbar-nav ms-auto">
+                {% raw %}{% if user.is_authenticated %}
+                    <span class="navbar-text me-3">Hello, {{ user.username }}</span>
+                    <a href="/admin/" class="nav-link">Admin</a>
+                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Login</a>
+                {% endif %}{% endraw %}
             </div>
         </div>
     </nav>
-
-    <!-- Main Content -->
-    <main class="{% if ui == 'tailwind' %}max-w-7xl mx-auto py-6 sm:px-6 lg:px-8{% elif ui == 'bootstrap' %}container mt-4{% endif %}">
-        <!-- Messages will be handled by Django -->
-        <!-- Django messages will be displayed here -->
-
-        {% block content %}
-        <div class="{% if ui == 'tailwind' %}text-center py-12{% elif ui == 'bootstrap' %}text-center py-5{% endif %}">
-            <h1 class="{% if ui == 'tailwind' %}text-4xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}display-4 mb-4{% endif %}">
-                Welcome to {{ project_name }}
-            </h1>
-            <p class="{% if ui == 'tailwind' %}text-lg text-gray-600{% elif ui == 'bootstrap' %}lead{% endif %}">
-                Your Django project is ready! Start building amazing applications.
-            </p>
+    
+    <div class="container mt-4">
+        {% raw %}{% block content %}{% endraw %}
+        <div class="jumbotron">
+            <h1 class="display-4">Welcome to {{ project_name }}</h1>
+            <p class="lead">Your Django project is ready!</p>
         </div>
-        {% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="{% if ui == 'tailwind' %}bg-gray-800 text-white py-8 mt-12{% elif ui == 'bootstrap' %}bg-dark text-white py-4 mt-5{% endif %}">
-        <div class="{% if ui == 'tailwind' %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8{% elif ui == 'bootstrap' %}container{% endif %}">
-            <div class="{% if ui == 'tailwind' %}text-center{% endif %}">
-                <p>&copy; 2024 {{ project_name }}. Generated with CoreX.</p>
-            </div>
-        </div>
-    </footer>
-
-    {% if ui == 'bootstrap' %}
-    <!-- Bootstrap JS -->
+        {% raw %}{% endblock %}{% endraw %}
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% else %}
+    <header>
+        <nav>
+            <a href="/">{{ project_name }}</a>
+            <div>
+                {% raw %}{% if user.is_authenticated %}
+                    <span>Hello, {{ user.username }}</span>
+                    <a href="/admin/">Admin</a>
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                {% endif %}{% endraw %}
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        {% raw %}{% block content %}{% endraw %}
+        <h1>Welcome to {{ project_name }}</h1>
+        <p>Your Django project is ready!</p>
+        {% raw %}{% endblock %}{% endraw %}
+    </main>
     {% endif %}
     
-    <!-- Custom JS -->
-    <script src="/static/js/main.js"></script>
-    
-    {% block extra_js %}{% endblock %}
+    {% raw %}{% block extra_js %}{% endblock %}{% endraw %}
 </body>
 </html>

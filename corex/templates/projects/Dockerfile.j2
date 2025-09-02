@@ -1,10 +1,8 @@
-# Use Python 3.9 slim image
-FROM python:3.9-slim
+FROM python:{{ python_version }}-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE={{ project_name }}.settings
 
 # Set work directory
 WORKDIR /app
@@ -12,36 +10,40 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        build-essential \
+        {% if database == 'postgres' %}
+        postgresql-client \
         libpq-dev \
-        libmysqlclient-dev \
-        pkg-config \
-        curl \
+        {% elif database == 'mysql' %}
+        default-mysql-client \
+        default-libmysqlclient-dev \
+        {% endif %}
+        gcc \
+        gettext \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
 RUN pip install poetry
 
 # Copy poetry files
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml poetry.lock* /app/
 
-# Configure poetry to not create virtual environment
-RUN poetry config virtualenvs.create false
-
-# Install dependencies
-RUN poetry install --no-dev --no-interaction --no-ansi
+# Configure poetry
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-dev
 
 # Copy project
-COPY . .
+COPY . /app/
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Create logs directory
-RUN mkdir -p logs
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
 # Expose port
 EXPOSE 8000
 
-# Run the application
+# Run gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "{{ project_name }}.wsgi:application"]
