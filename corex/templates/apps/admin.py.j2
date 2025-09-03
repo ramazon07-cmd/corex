@@ -24,19 +24,19 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'category', 'status', 'publish', 'created_at']
-    list_filter = ['status', 'category', 'publish', 'created_at']
+    list_display = ['title', 'author', 'category', 'status', 'published_at', 'created_at']
+    list_filter = ['status', 'category', 'published_at', 'created_at']
     search_fields = ['title', 'content']
     prepopulated_fields = {'slug': ('title',)}
-    date_hierarchy = 'publish'
-    ordering = ['-publish']
+    date_hierarchy = 'published_at'
+    ordering = ['-published_at']
     filter_horizontal = ['tags']
 
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['author', 'post', 'created_at', 'active']
-    list_filter = ['active', 'created_at']
+    list_display = ['author', 'post', 'created_at', 'is_approved']
+    list_filter = ['is_approved', 'created_at']
     search_fields = ['author__username', 'content']
     ordering = ['-created_at']
 
@@ -51,12 +51,26 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'price', 'sale_price', 'stock', 'available', 'created_at']
-    list_filter = ['available', 'category', 'created_at']
+    list_display = ['name', 'category', 'price', 'sale_price', 'stock_quantity', 'is_active', 'created_at']
+    list_filter = ['is_active', 'category', 'created_at']
     search_fields = ['name', 'sku']
     prepopulated_fields = {'slug': ('name',)}
-    list_editable = ['price', 'stock', 'available']
+    list_editable = ['price', 'stock_quantity', 'is_active']
     ordering = ['-created_at']
+
+
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    extra = 0
+
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['user', 'session_key', 'total_items', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username']
+    ordering = ['-created_at']
+    inlines = [CartItemInline]
 
 
 class OrderItemInline(admin.TabularInline):
@@ -66,17 +80,25 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'status', 'total_amount', 'created_at']
+    list_display = ['order_number', 'user', 'status', 'total_amount', 'created_at']
     list_filter = ['status', 'created_at']
-    search_fields = ['user__username', 'user__email']
+    search_fields = ['user__username', 'user__email', 'order_number']
     ordering = ['-created_at']
     inlines = [OrderItemInline]
 
 {% endraw %}{% elif app_type == 'wiki' %}{% raw %}
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'parent', 'created_at']
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ['name']
+    list_filter = ['parent', 'created_at']
+
+
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'is_published', 'created_at', 'updated_at']
-    list_filter = ['is_published', 'created_at']
+    list_display = ['title', 'author', 'status', 'created_at', 'updated_at']
+    list_filter = ['status', 'created_at']
     search_fields = ['title', 'content']
     prepopulated_fields = {'slug': ('title',)}
     ordering = ['-updated_at']
@@ -84,9 +106,9 @@ class PageAdmin(admin.ModelAdmin):
 
 @admin.register(PageRevision)
 class PageRevisionAdmin(admin.ModelAdmin):
-    list_display = ['page', 'editor', 'created_at', 'comment']
+    list_display = ['page', 'author', 'created_at', 'comment']
     list_filter = ['created_at']
-    search_fields = ['page__title', 'editor__username']
+    search_fields = ['page__title', 'author__username']
     ordering = ['-created_at']
 
 {% endraw %}{% elif app_type == 'crm' %}{% raw %}

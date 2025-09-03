@@ -103,7 +103,7 @@ def new_command(
     
     # Create initial migration
     print_step(6, 8, "Creating initial migration...")
-    code, _, stderr = run_command("python manage.py makemigrations", capture_output=True)
+    code, _, stderr = run_command("python3 manage.py makemigrations", capture_output=True)
     if code == 0:
         print_success("Initial migration created")
     else:
@@ -111,7 +111,7 @@ def new_command(
     
     # Run migrations
     print_step(7, 8, "Running migrations...")
-    code, _, stderr = run_command("python manage.py migrate", capture_output=True)
+    code, _, stderr = run_command("python3 manage.py migrate", capture_output=True)
     if code == 0:
         print_success("Migrations applied")
     else:
@@ -229,7 +229,7 @@ def app_command(
     # Create migrations
     print_step(3, 4, "Creating migrations...")
     os.chdir(project_root)
-    code, _, stderr = run_command(f"python manage.py makemigrations {app_name}", capture_output=True)
+    code, _, stderr = run_command(f"python3 manage.py makemigrations {app_name}", capture_output=True)
     if code == 0:
         print_success("Migrations created")
     else:
@@ -237,7 +237,7 @@ def app_command(
     
     # Run migrations
     print_step(4, 4, "Running migrations...")
-    code, _, stderr = run_command(f"python manage.py migrate", capture_output=True)
+    code, _, stderr = run_command(f"python3 manage.py migrate", capture_output=True)
     if code == 0:
         print_success("Migrations applied")
     else:
@@ -289,7 +289,7 @@ def scaffold_command(
     # Create migrations
     print_step(2, 3, "Creating migrations...")
     os.chdir(project_root)
-    code, _, stderr = run_command(f"python manage.py makemigrations {app}", capture_output=True)
+    code, _, stderr = run_command(f"python3 manage.py makemigrations {app}", capture_output=True)
     if code == 0:
         print_success("Migrations created")
     else:
@@ -297,7 +297,7 @@ def scaffold_command(
     
     # Run migrations
     print_step(3, 3, "Running migrations...")
-    code, _, stderr = run_command(f"python manage.py migrate", capture_output=True)
+    code, _, stderr = run_command(f"python3 manage.py migrate", capture_output=True)
     if code == 0:
         print_success("Migrations applied")
     else:
@@ -352,12 +352,12 @@ def runserver_command(ctx: click.Context, docker: bool, port: int, host: str) ->
         
         # Run migrations first
         print_info("Checking for pending migrations...")
-        code, stdout, _ = run_command("python manage.py showmigrations --plan", capture_output=True)
+        code, stdout, _ = run_command("python3 manage.py showmigrations --plan", capture_output=True)
         if code == 0 and "[ ]" in stdout:
             print_info("Applying pending migrations...")
-            run_command("python manage.py migrate", capture_output=True)
+            run_command("python3 manage.py migrate", capture_output=True)
         
-        cmd = f"python manage.py runserver {host}:{port}"
+        cmd = f"python3 manage.py runserver {host}:{port}"
         run_command(cmd)
 
 
@@ -378,14 +378,14 @@ def test_command(
     # Build test command
     if coverage:
         # Check if coverage is installed
-        code, _, _ = run_command("python -c 'import coverage'", capture_output=True)
+        code, _, _ = run_command("python3 -c 'import coverage'", capture_output=True)
         if code != 0:
             print_info("Installing coverage...")
             run_command("pip install coverage", capture_output=True)
         
         cmd = "coverage run --source='.' manage.py test"
     else:
-        cmd = "python manage.py test"
+        cmd = "python3 manage.py test"
     
     if app_name:
         cmd += f" {app_name}"
@@ -547,7 +547,7 @@ def doctor_command(ctx: click.Context, fix: bool) -> None:
     print_step(3, 6, "Checking database...")
     if project_root:
         os.chdir(project_root)
-        code, stdout, stderr = run_command("python manage.py check --database default", capture_output=True)
+        code, stdout, stderr = run_command("python3 manage.py check --database default", capture_output=True)
         if code == 0:
             print_success("Database configuration is valid")
         else:
@@ -557,7 +557,7 @@ def doctor_command(ctx: click.Context, fix: bool) -> None:
     # Check migrations
     print_step(4, 6, "Checking migrations...")
     if project_root:
-        code, stdout, stderr = run_command("python manage.py showmigrations", capture_output=True)
+        code, stdout, stderr = run_command("python3 manage.py showmigrations", capture_output=True)
         if code == 0:
             if "[ ]" in stdout:
                 print_warning("Unapplied migrations found")
@@ -603,7 +603,7 @@ def doctor_command(ctx: click.Context, fix: bool) -> None:
         
         if "Unapplied migrations" in issues:
             print_info("Applying migrations...")
-            code, _, stderr = run_command("python manage.py migrate", capture_output=True)
+            code, _, stderr = run_command("python3 manage.py migrate", capture_output=True)
             if code == 0:
                 print_success("Migrations applied")
             else:
@@ -611,7 +611,7 @@ def doctor_command(ctx: click.Context, fix: bool) -> None:
         
         if "Static files not collected" in issues:
             print_info("Collecting static files...")
-            code, _, stderr = run_command("python manage.py collectstatic --noinput", capture_output=True)
+            code, _, stderr = run_command("python3 manage.py collectstatic --noinput", capture_output=True)
             if code == 0:
                 print_success("Static files collected")
             else:
@@ -638,17 +638,17 @@ def seed_command(ctx: click.Context, app: Optional[str], count: int) -> None:
         seed_command_path = app_path / "management" / "commands" / "seed.py"
         if seed_command_path.exists():
             print_info(f"Running seed command for {app}...")
-            cmd = f"python manage.py seed --app {app} --count {count}"
+            cmd = f"python3 manage.py seed --app {app} --count {count}"
         else:
             print_warning(f"No seed command found for app '{app}'")
             print_info("Generating basic seed data...")
-            cmd = f"python manage.py seed --count {count}"
+            cmd = f"python3 manage.py seed --count {count}"
     else:
         print_info("Generating seed data for all apps...")
-        cmd = f"python manage.py seed --count {count}"
+        cmd = f"python3 manage.py seed --count {count}"
     
     # Check if seed command exists in Django
-    code, _, stderr = run_command("python manage.py help seed", capture_output=True)
+    code, _, stderr = run_command("python3 manage.py help seed", capture_output=True)
     if code != 0:
         print_warning("Django seed command not found")
         print_info("Creating basic seed data script...")
@@ -696,7 +696,7 @@ print("Seed data generation complete!")
         run_command("pip install faker", capture_output=True)
         
         # Run the seed script
-        code, stdout, stderr = run_command("python seed_data.py")
+        code, stdout, stderr = run_command("python3 seed_data.py")
         if code == 0:
             print_success("Seed data generated successfully!")
         else:
@@ -724,34 +724,47 @@ def add_to_installed_apps(project_root: Path, app_name: str) -> None:
         content = settings_file.read_text()
         
         # Check if app is already in INSTALLED_APPS
-        if f"'{app_name}'," in content or f'"{app_name}",' in content:
+        if f"'{app_name}'" in content or f'"{app_name}"' in content:
             print_info(f"App '{app_name}' already in INSTALLED_APPS")
             return
         
-        # Find INSTALLED_APPS and add the app
+        # Find LOCAL_APPS first (CoreX pattern)
         lines = content.split('\n')
-        in_installed_apps = False
+        in_local_apps = False
         added = False
         
         for i, line in enumerate(lines):
-            if 'INSTALLED_APPS' in line and '=' in line:
-                in_installed_apps = True
+            if 'LOCAL_APPS' in line and '=' in line and '[' in line:
+                in_local_apps = True
                 continue
             
-            if in_installed_apps:
+            if in_local_apps:
                 if line.strip().startswith(']'):
-                    # End of INSTALLED_APPS, add before closing bracket
+                    # End of LOCAL_APPS, add before closing bracket
                     lines.insert(i, f"    '{app_name}',")
                     added = True
                     break
-                elif line.strip().endswith(','):
+                elif line.strip().endswith(',') or '# Add' in line:
                     # Continue looking for the end
                     continue
-                else:
-                    # Add after the last app
-                    lines.insert(i, f"    '{app_name}',")
-                    added = True
-                    break
+        
+        # If LOCAL_APPS pattern not found, try standard INSTALLED_APPS
+        if not added:
+            in_installed_apps = False
+            for i, line in enumerate(lines):
+                if 'INSTALLED_APPS' in line and '=' in line and '[' in line:
+                    in_installed_apps = True
+                    continue
+                
+                if in_installed_apps:
+                    if line.strip().startswith(']'):
+                        # End of INSTALLED_APPS, add before closing bracket
+                        lines.insert(i, f"    '{app_name}',")
+                        added = True
+                        break
+                    elif line.strip().endswith(','):
+                        # Continue looking for the end
+                        continue
         
         if added:
             settings_file.write_text('\n'.join(lines))

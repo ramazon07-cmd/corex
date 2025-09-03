@@ -510,7 +510,7 @@ pip install --upgrade corex
 ```bash
 # Instead of:
 django-admin startproject myproject
-python manage.py startapp myapp
+python3 manage.py startapp myapp
 
 # Use CoreX:
 corex new myproject --auth=session --ui=bootstrap

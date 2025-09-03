@@ -104,7 +104,7 @@ def migrate(ctx: click.Context, app: Optional[str], fake: bool) -> None:
         sys.exit(1)
     
     os.chdir(project_root)
-    cmd = f"python manage.py migrate"
+    cmd = f"python3 manage.py migrate"
     if app:
         cmd += f" {app}"
     if fake:
@@ -127,7 +127,7 @@ def createsuperuser(ctx: click.Context, username: Optional[str], email: Optional
         sys.exit(1)
     
     os.chdir(project_root)
-    cmd = "python manage.py createsuperuser"
+    cmd = "python3 manage.py createsuperuser"
     if username:
         cmd += f" --username {username}"
     if email:

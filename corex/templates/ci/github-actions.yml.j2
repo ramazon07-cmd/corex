@@ -103,7 +103,7 @@ jobs:
         {% endif %}
         REDIS_URL: redis://localhost:6379/0
       run: |
-        poetry run python manage.py migrate
+        poetry run python3 manage.py migrate
         poetry run coverage run manage.py test
         poetry run coverage report
         poetry run coverage xml

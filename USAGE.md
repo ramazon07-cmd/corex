@@ -602,8 +602,8 @@ corex doctor
 ```bash
 # Reset migrations (development only)
 rm -rf app/migrations/
-python manage.py makemigrations app
-python manage.py migrate
+python3 manage.py makemigrations app
+python3 manage.py migrate
 ```
 
 **Template not found:**

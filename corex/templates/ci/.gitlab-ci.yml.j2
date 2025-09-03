@@ -62,7 +62,7 @@ test:
     - poetry run isort --check-only .
     
     # Testing
-    - poetry run python manage.py migrate
+    - poetry run python3 manage.py migrate
     - poetry run coverage run manage.py test
     - poetry run coverage report
     - poetry run coverage xml
@@ -104,7 +104,7 @@ deploy:
   script:
     - echo "Add your deployment script here"
     # Example deployment commands:
-    # - ssh user@server "cd /path/to/app && git pull && poetry install && python manage.py migrate && sudo systemctl restart app"
+    # - ssh user@server "cd /path/to/app && git pull && poetry install && python3 manage.py migrate && sudo systemctl restart app"
   
   only:
     - main

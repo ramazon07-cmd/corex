@@ -129,9 +129,9 @@ def demo_corex():
         print_info("\n5️⃣ Next steps:")
         print_info("   📝 cd demo_project")
         print_info("   📝 poetry install")
-        print_info("   📝 python manage.py migrate")
-        print_info("   📝 python manage.py createsuperuser")
-        print_info("   📝 python manage.py runserver")
+        print_info("   📝 python3 manage.py migrate")
+        print_info("   📝 python3 manage.py createsuperuser")
+        print_info("   📝 python3 manage.py runserver")
         print_info("   📝 Visit http://localhost:8000")
         
         print_success("\n🎉 CoreX demo completed successfully!")

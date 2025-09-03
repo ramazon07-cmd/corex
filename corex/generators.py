@@ -410,9 +410,15 @@ def generate_app_type_files(app_path: Path, app_type: str, context: Dict, env: E
         template = env.get_template(f"types/{app_type}.py.j2")
         content = template.render(**context)
         
-        # Create app-specific models file
-        models_file = app_path / f"{app_type}_models.py"
-        models_file.write_text(content)
+        # Add the app-specific models to the main models.py file
+        models_file = app_path / "models.py"
+        
+        # Read existing content
+        existing_content = models_file.read_text()
+        
+        # Add the app-specific models to the end
+        updated_content = existing_content.rstrip() + "\n\n\n" + content
+        models_file.write_text(updated_content)
         
         print_info(f"Generated {app_type}-specific models")
         
