@@ -27,7 +27,7 @@
     </div>
 
     <div class="grid gap-6">
-        {% for post in page_obj %}
+        {% for {% endraw %}{% if app_type == 'shop' %}product in products{% else %}post in page_obj{% endif %}{% raw %} %}
         <div class="card">
             {% endraw %}{% if app_type == 'blog' %}{% raw %}
             <h2 class="text-xl font-semibold mb-2">
@@ -42,17 +42,17 @@
             </div>
             {% endraw %}{% elif app_type == 'shop' %}{% raw %}
             <div class="flex items-center space-x-4">
-                {% if item.image %}
-                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-16 h-16 object-cover rounded">
+                {% if product.featured_image %}
+                <img src="{{ product.featured_image.url }}" alt="{{ product.name }}" class="w-16 h-16 object-cover rounded">
                 {% endif %}
                 <div class="flex-1">
                     <h3 class="text-lg font-semibold">
-                        <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:product_detail' item.slug %}" class="text-blue-600 hover:text-blue-800">
-                            {{ item.name }}
+                        <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:product_detail' product.slug %}" class="text-blue-600 hover:text-blue-800">
+                            {{ product.name }}
                         </a>
                     </h3>
-                    <p class="text-gray-600">{{ item.description|truncatewords:20 }}</p>
-                    <p class="text-xl font-bold text-green-600">${{ item.display_price }}</p>
+                    <p class="text-gray-600">{{ product.description|truncatewords:20 }}</p>
+                    <p class="text-xl font-bold text-green-600">${{ product.current_price }}</p>
                 </div>
             </div>
             {% endraw %}{% elif app_type == 'wiki' %}{% raw %}
@@ -105,7 +105,7 @@
         </div>
         {% empty %}
         <div class="text-center py-8">
-            <p class="text-gray-500">No posts found.</p>
+            <p class="text-gray-500">No {% endraw %}{% if app_type == 'shop' %}products{% else %}posts{% endif %}{% raw %} found.</p>
         </div>
         {% endfor %}
     </div>
