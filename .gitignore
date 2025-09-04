@@ -147,3 +147,9 @@ media/
 # Demo projects (optional - you might want to include these)
 # demo/
 # myproject/
+
+# Test projects and generated projects
+testproject/
+final_test_project/
+*_test_project/
+test_*/
