@@ -679,7 +679,7 @@ for i in range({count}):
         user = User.objects.create_user(
             username=username,
             email=email,
-            password='testpass123',
+            password='demo123',  # Default demo password
             first_name=fake.first_name(),
             last_name=fake.last_name()
         )
