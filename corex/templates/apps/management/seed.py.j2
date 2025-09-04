@@ -137,9 +137,9 @@ class Command(BaseCommand):
                 price=fake.pydecimal(left_digits=3, right_digits=2, positive=True),
                 category=random.choice(categories),
                 sku=fake.bothify(text='???-###'),
-                stock=fake.random_int(min=0, max=100),
-                available=True,
-                featured=fake.boolean(chance_of_getting_true=20)
+                stock_quantity=fake.random_int(min=0, max=100),
+                is_active=True,
+                is_featured=fake.boolean(chance_of_getting_true=20)
             )
         
         {% elif app_type == 'wiki' %}
