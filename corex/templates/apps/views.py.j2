@@ -18,22 +18,22 @@ def post_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, '{% endraw %}{{ app_name }}{% raw %}/post_list.html', {
+    return render(request, '{% endraw %}{{ app_name }}{% raw %}/list.html', {
         'page_obj': page_obj,
         'posts': page_obj
     })
 
 
-def post_detail(request, year, month, day, slug):
+def post_detail(request, slug):
     post = get_object_or_404(Post, 
                            slug=slug,
-                           status='published',
-                           publish__year=year,
-                           publish__month=month,
-                           publish__day=day)
-    comments = post.comments.filter(active=True)
+                           status='published')
+    comments = post.comments.filter(is_approved=True)
     
-    return render(request, '{% endraw %}{{ app_name }}{% raw %}/post_detail.html', {
+    # Increment view count
+    post.increment_views()
+    
+    return render(request, '{% endraw %}{{ app_name }}{% raw %}/detail.html', {
         'post': post,
         'comments': comments
     })

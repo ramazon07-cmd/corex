@@ -223,11 +223,15 @@ def app_command(
         return
     
     # Add app to INSTALLED_APPS
-    print_step(2, 4, "Adding app to INSTALLED_APPS...")
+    print_step(2, 5, "Adding app to INSTALLED_APPS...")
     add_to_installed_apps(project_root, app_name)
     
+    # Add app URLs to main project
+    print_step(3, 5, "Adding app URLs to project...")
+    add_to_project_urls(project_root, app_name)
+    
     # Create migrations
-    print_step(3, 4, "Creating migrations...")
+    print_step(4, 5, "Creating migrations...")
     os.chdir(project_root)
     code, _, stderr = run_command(f"python3 manage.py makemigrations {app_name}", capture_output=True)
     if code == 0:
@@ -236,7 +240,7 @@ def app_command(
         print_warning(f"Failed to create migrations: {stderr}")
     
     # Run migrations
-    print_step(4, 4, "Running migrations...")
+    print_step(5, 5, "Running migrations...")
     code, _, stderr = run_command(f"python3 manage.py migrate", capture_output=True)
     if code == 0:
         print_success("Migrations applied")
@@ -776,3 +780,55 @@ def add_to_installed_apps(project_root: Path, app_name: str) -> None:
     except Exception as e:
         print_warning(f"Could not update settings: {e}")
         print_info(f"Please add '{app_name}' to INSTALLED_APPS manually")
+
+
+def add_to_project_urls(project_root: Path, app_name: str) -> None:
+    """Add app URLs to main project urls.py"""
+    # Find main project urls.py
+    project_name = project_root.name
+    urls_file = project_root / project_name / "urls.py"
+    
+    if not urls_file.exists():
+        print_warning("Could not find main urls.py")
+        return
+    
+    try:
+        content = urls_file.read_text()
+        
+        # Check if app URLs are already included
+        if f"include('{app_name}.urls')" in content:
+            print_info(f"App '{app_name}' URLs already included")
+            return
+        
+        # Find urlpatterns and add the app URL
+        lines = content.split('\n')
+        in_urlpatterns = False
+        added = False
+        
+        for i, line in enumerate(lines):
+            if 'urlpatterns' in line and '=' in line and '[' in line:
+                in_urlpatterns = True
+                continue
+            
+            if in_urlpatterns:
+                if line.strip().startswith(']'):
+                    # End of urlpatterns, add before closing bracket
+                    lines.insert(i, f"    path('', include('{app_name}.urls')),  # {app_name.title()} as homepage")
+                    added = True
+                    break
+                elif "path('admin/" in line:
+                    # Add after admin path
+                    lines.insert(i + 1, f"    path('', include('{app_name}.urls')),  # {app_name.title()} as homepage")
+                    added = True
+                    break
+        
+        if added:
+            urls_file.write_text('\n'.join(lines))
+            print_success(f"Added '{app_name}' URLs to main project")
+        else:
+            print_warning("Could not automatically add URLs to main project")
+            print_info(f"Please add path('', include('{app_name}.urls')) to urlpatterns manually")
+    
+    except Exception as e:
+        print_warning(f"Could not update urls.py: {e}")
+        print_info(f"Please add path('', include('{app_name}.urls')) to urlpatterns manually")

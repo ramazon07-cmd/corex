@@ -11,7 +11,7 @@ app_name = '{% endraw %}{{ app_name }}{% raw %}'
 {% endraw %}{% if app_type == 'blog' %}{% raw %}
 urlpatterns = [
     path('', views.post_list, name='post_list'),
-    path('<int:year>/<int:month>/<int:day>/<slug:slug>/', views.post_detail, name='post_detail'),
+    path('<slug:slug>/', views.post_detail, name='post_detail'),
     path('category/<slug:slug>/', views.category_detail, name='category_detail'),
 ]
 {% endraw %}{% elif app_type == 'shop' %}{% raw %}

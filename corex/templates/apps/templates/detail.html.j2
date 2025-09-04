@@ -4,9 +4,9 @@
 
 {% raw %}{% block content %}
 <div class="{% endraw %}{% if ui == 'tailwind' %}max-w-3xl mx-auto{% elif ui == 'bootstrap' %}container{% endif %}{% raw %}">
-    <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h2 mb-3{% endif %}{% raw %}">{{ item.title }}</h1>
-    <div class="{% endraw %}{% if ui == 'tailwind' %}text-gray-700 mb-6{% elif ui == 'bootstrap' %}mb-4{% endif %}{% raw %}">{{ item.description }}</div>
-    <div class="{% endraw %}{% if ui == 'tailwind' %}text-sm text-gray-500{% elif ui == 'bootstrap' %}small text-muted{% endif %}{% raw %}">By {{ item.author.username }} • {{ item.created_at }}</div>
+    <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h2 mb-3{% endif %}{% raw %}">{{ post.title }}</h1>
+    <div class="{% endraw %}{% if ui == 'tailwind' %}text-gray-700 mb-6{% elif ui == 'bootstrap' %}mb-4{% endif %}{% raw %}">{{ post.content }}</div>
+    <div class="{% endraw %}{% if ui == 'tailwind' %}text-sm text-gray-500{% elif ui == 'bootstrap' %}small text-muted{% endif %}{% raw %}">By {{ post.author.username }} • {{ post.published_at }}</div>
 </div>
 {% endblock %}{% endraw %}
 

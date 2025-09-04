@@ -6,15 +6,14 @@
     <title>{% raw %}{% block title %}{% endraw %}{{ project_name }}{% raw %}{% endblock %}{% endraw %}</title>
     
     {% if ui == 'tailwind' %}
-    {% raw %}{% load static tailwind_tags %}
-    {% tailwind_css %}{% endraw %}
+    {% raw %}{% load static %}{% endraw %}
+    <link rel="stylesheet" href="{% raw %}{% static 'css/output.css' %}{% endraw %}">
     {% elif ui == 'bootstrap' %}
     {% raw %}{% load static %}{% endraw %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     {% endif %}
     
-    {% raw %}{% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">{% endraw %}
+    {% raw %}{% load static %}{% endraw %}
     
     {% raw %}{% block extra_head %}{% endblock %}{% endraw %}
 </head>
@@ -31,9 +30,8 @@
                         {% raw %}{% if user.is_authenticated %}
                             <span class="text-gray-700">Hello, {{ user.username }}</span>
                             <a href="/admin/" class="text-blue-600 hover:text-blue-800">Admin</a>
-                            <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-800">Logout</a>
                         {% else %}
-                            <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-800">Login</a>
+                            <a href="/admin/" class="text-blue-600 hover:text-blue-800">Admin</a>
                         {% endif %}{% endraw %}
                     </div>
                 </div>

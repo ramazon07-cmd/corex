@@ -191,6 +191,125 @@ def generate_ui_files(project_path: Path, context: Dict, env: Environment) -> No
         css_content = css_template.render(**context)
         (css_dir / "input.css").write_text(css_content)
         
+        # Generate a basic compiled CSS file for immediate use
+        output_css_content = """/* Basic CSS for immediate use - replace with compiled Tailwind */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9fafb;
+}
+
+/* Utility classes */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.text-center { text-align: center; }
+.text-3xl { font-size: 1.875rem; font-weight: bold; }
+.text-xl { font-size: 1.25rem; font-weight: 600; }
+.text-blue-600 { color: #2563eb; }
+.text-blue-800 { color: #1e40af; }
+.text-gray-600 { color: #4b5563; }
+.text-gray-700 { color: #374151; }
+.text-gray-900 { color: #111827; }
+.text-gray-500 { color: #6b7280; }
+
+.bg-white { background-color: white; }
+.bg-gray-50 { background-color: #f9fafb; }
+.bg-blue-100 { background-color: #dbeafe; }
+.bg-blue-800 { background-color: #1e40af; }
+
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.py-2 { padding: 0.5rem 0; }
+.py-6 { padding: 1.5rem 0; }
+.py-8 { padding: 2rem 0; }
+.px-2 { padding: 0 0.5rem; }
+.px-4 { padding: 0 1rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-8 { margin-bottom: 2rem; }
+.mt-8 { margin-top: 2rem; }
+
+.min-h-screen { min-height: 100vh; }
+.max-w-7xl { max-width: 80rem; }
+.mx-auto { margin: 0 auto; }
+
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.items-center { align-items: center; }
+.space-x-4 > * + * { margin-left: 1rem; }
+.space-x-2 > * + * { margin-left: 0.5rem; }
+
+.grid { display: grid; }
+.gap-6 { gap: 1.5rem; }
+
+.h-16 { height: 4rem; }
+.h-96 { height: 24rem; }
+
+.border { border: 1px solid #d1d5db; }
+.border-4 { border: 4px solid; }
+.border-dashed { border-style: dashed; }
+.border-gray-200 { border-color: #e5e7eb; }
+.border-gray-300 { border-color: #d1d5db; }
+.border-blue-500 { border-color: #3b82f6; }
+
+.rounded { border-radius: 0.25rem; }
+.rounded-lg { border-radius: 0.5rem; }
+
+.shadow { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.shadow-md { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+
+/* Navigation */
+nav {
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Card component */
+.card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Links */
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .text-3xl {
+        font-size: 1.5rem;
+    }
+}"""
+        (css_dir / "output.css").write_text(output_css_content)
+        
         # Create theme app for django-tailwind
         theme_dir = project_path / "theme"
         create_directory(theme_dir)
@@ -410,15 +529,11 @@ def generate_app_type_files(app_path: Path, app_type: str, context: Dict, env: E
         template = env.get_template(f"types/{app_type}.py.j2")
         content = template.render(**context)
         
-        # Add the app-specific models to the main models.py file
+        # Replace the main models.py file with app-specific models
         models_file = app_path / "models.py"
         
-        # Read existing content
-        existing_content = models_file.read_text()
-        
-        # Add the app-specific models to the end
-        updated_content = existing_content.rstrip() + "\n\n\n" + content
-        models_file.write_text(updated_content)
+        # Replace the entire content with app-specific models
+        models_file.write_text(content)
         
         print_info(f"Generated {app_type}-specific models")
         
@@ -527,10 +642,16 @@ def generate_model_scaffold(app_path: Path, context: Dict, env: Environment) -> 
     template = env.get_template("model.py.j2")
     content = template.render(**context)
     
-    # Append to models.py
+    # Read existing models.py content
     models_file = app_path / "models.py"
-    with open(models_file, 'a') as f:
-        f.write(f"\n\n{content}")
+    if models_file.exists():
+        existing_content = models_file.read_text()
+        # Append new model to existing content
+        updated_content = existing_content.rstrip() + "\n\n" + content
+        models_file.write_text(updated_content)
+    else:
+        # Create new models.py if it doesn't exist
+        models_file.write_text(content)
 
 
 def generate_view_scaffold(app_path: Path, context: Dict, env: Environment) -> None:
@@ -538,26 +659,33 @@ def generate_view_scaffold(app_path: Path, context: Dict, env: Environment) -> N
     template = env.get_template("view.py.j2")
     content = template.render(**context)
     
-    # Append to views.py
+    # Read existing views.py content and append safely
     views_file = app_path / "views.py"
-    with open(views_file, 'a') as f:
-        f.write(f"\n\n{content}")
+    if views_file.exists():
+        existing_content = views_file.read_text()
+        # Append new view to existing content
+        updated_content = existing_content.rstrip() + "\n\n" + content
+        views_file.write_text(updated_content)
+    else:
+        # Create new views.py if it doesn't exist
+        views_file.write_text(content)
 
 
 def generate_form_scaffold(app_path: Path, context: Dict, env: Environment) -> None:
     """Generate form scaffold"""
-    # Create forms.py if it doesn't exist
     forms_file = app_path / "forms.py"
+    
+    # Create forms.py with header if it doesn't exist
     if not forms_file.exists():
-        forms_file.touch()
         forms_file.write_text("# Forms\n\n")
     
     template = env.get_template("form.py.j2")
     content = template.render(**context)
     
-    # Append to forms.py
-    with open(forms_file, 'a') as f:
-        f.write(f"\n\n{content}")
+    # Read existing content and append safely
+    existing_content = forms_file.read_text()
+    updated_content = existing_content.rstrip() + "\n\n" + content
+    forms_file.write_text(updated_content)
 
 
 def generate_api_scaffold(app_path: Path, context: Dict, env: Environment) -> None:
@@ -578,11 +706,12 @@ def generate_api_scaffold(app_path: Path, context: Dict, env: Environment) -> No
         template = env.get_template(f"api/{filename}.j2")
         content = template.render(**context)
         
-        # Append to existing files or create new ones
-        file_path = api_dir / filename.replace('.py', '.py')
+        # Handle existing files or create new ones safely
+        file_path = api_dir / filename
         if file_path.exists():
-            with open(file_path, 'a') as f:
-                f.write(f"\n\n{content}")
+            existing_content = file_path.read_text()
+            updated_content = existing_content.rstrip() + "\n\n" + content
+            file_path.write_text(updated_content)
         else:
             file_path.write_text(content)
 
