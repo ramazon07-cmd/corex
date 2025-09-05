@@ -4,12 +4,79 @@
 
 {% raw %}{% block content %}
 <div class="{% endraw %}{% if ui == 'tailwind' %}max-w-2xl mx-auto{% elif ui == 'bootstrap' %}container{% endif %}{% raw %}">
+    {% endraw %}{% if app_type == 'wiki' %}{% raw %}
+    <div class="{% endraw %}{% if ui == 'bootstrap' %}row justify-content-center{% endif %}{% raw %}">
+        {% endraw %}{% if ui == 'bootstrap' %}{% raw %}<div class="col-md-8">{% endraw %}{% endif %}{% raw %}
+            <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-2xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h3 mb-4{% endif %}{% raw %}">{% if page.pk %}Edit Page{% else %}Create New Page{% endif %}</h1>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="{% endraw %}{% if ui == 'tailwind' %}mb-4{% elif ui == 'bootstrap' %}mb-3{% endif %}{% raw %}">
+                    <label for="title" class="{% endraw %}{% if ui == 'tailwind' %}block text-sm font-medium text-gray-700 mb-1{% elif ui == 'bootstrap' %}form-label{% endif %}{% raw %}">Title *</label>
+                    <input type="text" class="{% endraw %}{% if ui == 'tailwind' %}w-full px-3 py-2 border border-gray-300 rounded-md{% elif ui == 'bootstrap' %}form-control{% endif %}{% raw %}" id="title" name="title" 
+                           value="{{ page.title|default:'' }}" required>
+                </div>
+                
+                <div class="{% endraw %}{% if ui == 'tailwind' %}mb-4{% elif ui == 'bootstrap' %}mb-3{% endif %}{% raw %}">
+                    <label for="content" class="{% endraw %}{% if ui == 'tailwind' %}block text-sm font-medium text-gray-700 mb-1{% elif ui == 'bootstrap' %}form-label{% endif %}{% raw %}">Content *</label>
+                    <textarea class="{% endraw %}{% if ui == 'tailwind' %}w-full px-3 py-2 border border-gray-300 rounded-md{% elif ui == 'bootstrap' %}form-control{% endif %}{% raw %}" id="content" name="content" rows="15" required>{{ page.content|default:'' }}</textarea>
+                </div>
+                
+                <div class="{% endraw %}{% if ui == 'tailwind' %}grid grid-cols-2 gap-4{% elif ui == 'bootstrap' %}row{% endif %}{% raw %}">
+                    <div class="{% endraw %}{% if ui == 'bootstrap' %}col-md-6{% endif %}{% raw %}">
+                        <div class="{% endraw %}{% if ui == 'tailwind' %}mb-4{% elif ui == 'bootstrap' %}mb-3{% endif %}{% raw %}">
+                            <label for="status" class="{% endraw %}{% if ui == 'tailwind' %}block text-sm font-medium text-gray-700 mb-1{% elif ui == 'bootstrap' %}form-label{% endif %}{% raw %}">Status</label>
+                            <select class="{% endraw %}{% if ui == 'tailwind' %}w-full px-3 py-2 border border-gray-300 rounded-md{% elif ui == 'bootstrap' %}form-select{% endif %}{% raw %}" id="status" name="status">
+                                <option value="draft" {% if page.status == 'draft' or not page.pk %}selected{% endif %}>Draft</option>
+                                <option value="published" {% if page.status == 'published' %}selected{% endif %}>Published</option>
+                                <option value="archived" {% if page.status == 'archived' %}selected{% endif %}>Archived</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="{% endraw %}{% if ui == 'bootstrap' %}col-md-6{% endif %}{% raw %}">
+                        <div class="{% endraw %}{% if ui == 'tailwind' %}mb-4{% elif ui == 'bootstrap' %}mb-3{% endif %}{% raw %}">
+                            <label for="tags" class="{% endraw %}{% if ui == 'tailwind' %}block text-sm font-medium text-gray-700 mb-1{% elif ui == 'bootstrap' %}form-label{% endif %}{% raw %}">Tags</label>
+                            <input type="text" class="{% endraw %}{% if ui == 'tailwind' %}w-full px-3 py-2 border border-gray-300 rounded-md{% elif ui == 'bootstrap' %}form-control{% endif %}{% raw %}" id="tags" name="tags" 
+                                   value="{{ page.tags|default:'' }}" 
+                                   placeholder="Comma-separated tags">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="{% endraw %}{% if ui == 'tailwind' %}mb-4{% elif ui == 'bootstrap' %}mb-3{% endif %}{% raw %}">
+                    <label for="meta_description" class="{% endraw %}{% if ui == 'tailwind' %}block text-sm font-medium text-gray-700 mb-1{% elif ui == 'bootstrap' %}form-label{% endif %}{% raw %}">Meta Description</label>
+                    <textarea class="{% endraw %}{% if ui == 'tailwind' %}w-full px-3 py-2 border border-gray-300 rounded-md{% elif ui == 'bootstrap' %}form-control{% endif %}{% raw %}" id="meta_description" name="meta_description" 
+                              rows="2" maxlength="300" 
+                              placeholder="Brief description for SEO (optional)">{{ page.meta_description|default:'' }}</textarea>
+                </div>
+                
+                <div class="{% endraw %}{% if ui == 'tailwind' %}flex gap-2{% elif ui == 'bootstrap' %}d-flex gap-2{% endif %}{% raw %}">
+                    <button type="submit" class="{% endraw %}{% if ui == 'tailwind' %}bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded{% elif ui == 'bootstrap' %}btn btn-primary{% endif %}{% raw %}">
+                        {% if page.pk %}Update Page{% else %}Create Page{% endif %}
+                    </button>
+                    <a href="{% if page.pk %}{% url '{% endraw %}{{ app_name }}{% raw %}:page_detail' page.slug %}{% else %}{% url '{% endraw %}{{ app_name }}{% raw %}:page_list' %}{% endif %}" 
+                       class="{% endraw %}{% if ui == 'tailwind' %}bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded{% elif ui == 'bootstrap' %}btn btn-outline-secondary{% endif %}{% raw %}">Cancel</a>
+                </div>
+            </form>
+        {% endraw %}{% if ui == 'bootstrap' %}{% raw %}</div>{% endraw %}{% endif %}{% raw %}
+    </div>
+    {% endraw %}{% else %}{% raw %}
     <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-2xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h3 mb-3{% endif %}{% raw %}">Edit Item</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="{% endraw %}{% if ui == 'tailwind' %}btn-primary{% elif ui == 'bootstrap' %}btn btn-primary{% endif %}{% raw %}">Save</button>
     </form>
+    {% endraw %}{% endif %}{% raw %}
 </div>
 {% endblock %}{% endraw %}
-

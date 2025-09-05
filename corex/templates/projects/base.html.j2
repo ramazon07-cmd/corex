@@ -59,9 +59,9 @@
                 {% raw %}{% if user.is_authenticated %}
                     <span class="navbar-text me-3">Hello, {{ user.username }}</span>
                     <a href="/admin/" class="nav-link">Admin</a>
-                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                    <a href="{% url 'admin:logout' %}" class="nav-link">Logout</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'admin:login' %}" class="nav-link">Login</a>
                 {% endif %}{% endraw %}
             </div>
         </div>
@@ -85,9 +85,9 @@
                 {% raw %}{% if user.is_authenticated %}
                     <span>Hello, {{ user.username }}</span>
                     <a href="/admin/">Admin</a>
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'admin:logout' %}">Logout</a>
                 {% else %}
-                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'admin:login' %}">Login</a>
                 {% endif %}{% endraw %}
             </div>
         </nav>

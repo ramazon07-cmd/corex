@@ -7,7 +7,30 @@
     {% endraw %}{% if app_type == 'shop' %}{% raw %}
     <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h2 mb-3{% endif %}{% raw %}">{{ product.name }}</h1>
     <div class="{% endraw %}{% if ui == 'tailwind' %}text-gray-700 mb-6{% elif ui == 'bootstrap' %}mb-4{% endif %}{% raw %}">{{ product.description }}</div>
-    <div class="{% endraw %}{% if ui == 'tailwind' %}text-sm text-gray-500{% elif ui == 'bootstrap' %}small text-muted{% endif %}{% raw %}">Price: ${{ product.current_price }} • SKU: {{ product.sku }}</div>
+    <div class="{% endraw %}{% if ui == 'tailwind' %}text-sm text-gray-500{% elif ui == 'bootstrap' %}small text-muted{% endif %}{% raw %}">Price: ${{ product.price }} • SKU: {{ product.sku }}</div>
+    {% endraw %}{% elif app_type == 'wiki' %}{% raw %}
+    <div class="{% endraw %}{% if ui == 'tailwind' %}flex justify-between items-start mb-4{% elif ui == 'bootstrap' %}d-flex justify-content-between align-items-start mb-3{% endif %}{% raw %}">
+        <div>
+            <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900 mb-2{% elif ui == 'bootstrap' %}h2 mb-2{% endif %}{% raw %}">{{ page.title }}</h1>
+            <small class="{% endraw %}{% if ui == 'tailwind' %}text-gray-500{% elif ui == 'bootstrap' %}text-muted{% endif %}{% raw %}">
+                By {{ page.author.username }} • {{ page.updated_at|date:"M d, Y H:i" }}
+                {% if page.category %} • {{ page.category.name }}{% endif %}
+                • Status: {{ page.get_status_display }}
+            </small>
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:page_edit' page.slug %}" class="{% endraw %}{% if ui == 'tailwind' %}bg-blue-500 text-white px-3 py-1 rounded text-sm{% elif ui == 'bootstrap' %}btn btn-sm btn-outline-primary{% endif %}{% raw %}">Edit</a>
+            {% endif %}
+            <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:page_list' %}" class="{% endraw %}{% if ui == 'tailwind' %}bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm ml-2{% elif ui == 'bootstrap' %}btn btn-sm btn-outline-secondary{% endif %}{% raw %}">Back to List</a>
+        </div>
+    </div>
+    
+    <div class="{% endraw %}{% if ui == 'tailwind' %}bg-white shadow rounded-lg p-6{% elif ui == 'bootstrap' %}card{% endif %}{% raw %}">
+        {% endraw %}{% if ui == 'bootstrap' %}<div class="card-body">{% endif %}{% raw %}
+            {{ page.content|linebreaks }}
+        {% endraw %}{% if ui == 'bootstrap' %}</div>{% endif %}{% raw %}
+    </div>
     {% endraw %}{% else %}{% raw %}
     <h1 class="{% endraw %}{% if ui == 'tailwind' %}text-3xl font-bold text-gray-900 mb-4{% elif ui == 'bootstrap' %}h2 mb-3{% endif %}{% raw %}">{{ post.title }}</h1>
     <div class="{% endraw %}{% if ui == 'tailwind' %}text-gray-700 mb-6{% elif ui == 'bootstrap' %}mb-4{% endif %}{% raw %}">{{ post.content }}</div>

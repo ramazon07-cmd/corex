@@ -148,7 +148,7 @@
             {% endraw %}{% endif %}{% raw %}
         </h1>
         {% endraw %}{% if app_type in ['wiki', 'crm', 'forum'] %}{% raw %}
-        <a href="#" class="btn btn-primary">
+        <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:page_create' %}" class="btn btn-primary">
             {% endraw %}{% if app_type == 'wiki' %}{% raw %}New Page
             {% endraw %}{% elif app_type == 'crm' %}{% raw %}New Contact
             {% endraw %}{% elif app_type == 'forum' %}{% raw %}New Topic
@@ -160,8 +160,37 @@
     {% for item in page_obj %}
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">{{ item.name }}</h5>
+            {% if app_type == 'blog' %}
+            <h5 class="card-title">
+                <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:post_detail' item.slug %}" class="text-decoration-none">{{ item.title }}</a>
+            </h5>
+            <p class="card-text">{{ item.excerpt|default:item.content|truncatewords:20 }}</p>
+            <small class="text-muted">
+                By {{ item.author.username }} • {{ item.published_at|date:"M d, Y" }}
+                {% if item.category %} • {{ item.category.name }}{% endif %}
+            </small>
+            {% elif app_type == 'wiki' %}
+            <h5 class="card-title">
+                <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:page_detail' item.slug %}" class="text-decoration-none">{{ item.title }}</a>
+            </h5>
+            <p class="card-text">{{ item.content|truncatewords:20 }}</p>
+            <small class="text-muted">
+                By {{ item.author.username }} • {{ item.updated_at|date:"M d, Y" }}
+                {% if item.category %} • {{ item.category.name }}{% endif %}
+            </small>
+            {% elif app_type == 'shop' %}
+            <h5 class="card-title">
+                <a href="{% url '{% endraw %}{{ app_name }}{% raw %}:product_detail' item.slug %}" class="text-decoration-none">{{ item.name }}</a>
+            </h5>
             <p class="card-text">{{ item.description|truncatewords:20 }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0 text-primary">${{ item.price }}</span>
+                <small class="text-muted">{{ item.category.name }}</small>
+            </div>
+            {% else %}
+            <h5 class="card-title">{{ item.name|default:item.title }}</h5>
+            <p class="card-text">{{ item.description|default:item.content|truncatewords:20 }}</p>
+            {% endif %}
         </div>
     </div>
     {% empty %}

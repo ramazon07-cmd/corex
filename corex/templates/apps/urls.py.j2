@@ -23,6 +23,7 @@ urlpatterns = [
 {% endraw %}{% elif app_type == 'wiki' %}{% raw %}
 urlpatterns = [
     path('', views.page_list, name='page_list'),
+    path('create/', views.page_create, name='page_create'),
     path('page/<slug:slug>/', views.page_detail, name='page_detail'),
     path('page/<slug:slug>/edit/', views.page_edit, name='page_edit'),
 ]
@@ -41,8 +42,7 @@ urlpatterns = [
 {% endraw %}{% elif app_type == 'forum' %}{% raw %}
 urlpatterns = [
     path('', views.topic_list, name='topic_list'),
-    path('topic/<int:topic_id>/', views.topic_detail, name='topic_detail'),
-    path('create-topic/', views.create_topic, name='create_topic'),
+    path('topic/<slug:slug>/', views.topic_detail, name='topic_detail'),
 ]
 {% endraw %}{% else %}{% raw %}
 urlpatterns = [

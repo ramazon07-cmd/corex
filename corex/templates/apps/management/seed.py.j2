@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 slug=fake.slug(),
                 content=fake.text(max_nb_chars=2000),
                 author=random.choice(users),
-                is_published=True
+                status='published'
             )
             
             # Create revisions
@@ -158,7 +158,7 @@ class Command(BaseCommand):
                 PageRevision.objects.create(
                     page=page,
                     content=fake.text(max_nb_chars=2000),
-                    editor=random.choice(users),
+                    author=random.choice(users),
                     comment=fake.sentence()
                 )
         
