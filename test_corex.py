@@ -82,6 +82,15 @@ class TestCLI:
         result = runner.invoke(cli.main, ['--version'])
         assert result.exit_code == 0
         assert "1.0.0" in result.output
+    
+    def test_deploy_command_help(self):
+        """Test deploy command shows help"""
+        from click.testing import CliRunner
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ['deploy', '--help'])
+        assert result.exit_code == 0
+        assert "Deploy Django project" in result.output
+        assert "--platform" in result.output
 
 
 if __name__ == "__main__":
@@ -102,6 +111,7 @@ if __name__ == "__main__":
     test_cli = TestCLI()
     test_cli.test_main_command_help()
     test_cli.test_version_command()
+    test_cli.test_deploy_command_help()
     print("✓ CLI tests passed")
     
     print("\n🎉 All basic tests passed!")

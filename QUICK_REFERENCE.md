@@ -48,6 +48,7 @@ corex runserver [OPTIONS]
 | **Health check** | `corex doctor` | `corex doctor --fix` |
 | **Setup CI/CD** | `corex ci` | `corex ci --github --docker` |
 | **Add services** | `corex integrate SERVICE` | `corex integrate stripe` |
+| **Deploy project** | `corex deploy --platform=PLATFORM` | `corex deploy --platform=vercel --auto-db` |
 
 ## 🏗️ App Types & Use Cases
 
@@ -221,6 +222,22 @@ corex ci --gitlab
 
 # With Docker builds
 corex ci --github --docker
+```
+
+## 🚀 Deployment Options
+
+```bash
+# Deploy to Vercel
+corex deploy --platform=vercel
+
+# Deploy to Railway with auto database
+corex deploy --platform=railway --auto-db
+
+# Deploy to Render with custom domain
+corex deploy --platform=render --domain=myapp.com
+
+# Deploy to Heroku with region
+corex deploy --platform=heroku --region=us
 ```
 
 ---

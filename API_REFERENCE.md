@@ -87,6 +87,32 @@ Start the Django development server with optional Docker support.
 def runserver(ctx, docker, port, host) -> None
 ```
 
+#### `deploy` Command
+
+Deploy Django project to cloud platforms.
+
+```python
+@main.command()
+@click.option("--platform", type=click.Choice(["vercel", "railway", "render", "heroku"]), required=True)
+@click.option("--env-file", default=".env")
+@click.option("--auto-db", is_flag=True)
+@click.option("--domain")
+@click.option("--region")
+@click.option("--force", is_flag=True)
+@click.pass_context
+def deploy(ctx, platform, env_file, auto_db, domain, region, force) -> None
+```
+
+**Parameters:**
+- `platform` (str): Target deployment platform - "vercel", "railway", "render", or "heroku"
+- `env_file` (str): Environment file path (default: ".env")
+- `auto_db` (bool): Automatically provision database
+- `domain` (str): Custom domain name
+- `region` (str): Deployment region
+- `force` (bool): Force deployment even if checks fail
+
+**Returns:** None (exits with code 0 on success, 1 on failure)
+
 ---
 
 ## Core Modules
@@ -140,6 +166,30 @@ def app_command(
 4. Generates app using `generate_app()`
 5. Adds app to INSTALLED_APPS
 6. Creates and runs migrations
+
+#### `deploy_command()`
+
+```python
+def deploy_command(
+    ctx: click.Context,
+    platform: str,
+    env_file: str,
+    auto_db: bool,
+    domain: Optional[str],
+    region: Optional[str],
+    force: bool,
+) -> None
+```
+
+**Implementation Steps:**
+1. Validates Django project context
+2. Checks environment file exists
+3. Runs project health check
+4. Ensures Git repository is initialized
+5. Generates platform-specific deployment configuration
+6. Processes environment variables from .env file
+7. Executes platform-specific deployment commands
+8. Reports deployment status and URL
 
 #### `test_command()`
 
@@ -243,6 +293,32 @@ def generate_scaffold(
 - `api`: Generate DRF serializers and viewsets
 - `form`: Generate Django forms
 - `admin`: Generate admin interface
+
+#### `generate_deployment()`
+
+```python
+def generate_deployment(
+    project_root: Path,
+    platform: str,
+    env_file: str,
+    auto_db: bool,
+    domain: Optional[str],
+    region: Optional[str],
+) -> bool
+```
+
+**Generates:**
+- Platform-specific configuration files
+- Deployment scripts and manifests
+- Dockerfile and Docker Compose (if missing)
+- Updated requirements.txt with deployment dependencies
+- Environment variable templates
+
+**Supported Platforms:**
+- **Vercel**: `vercel.json`, serverless configuration
+- **Railway**: `railway.toml`, `Procfile`
+- **Render**: `render.yaml`, `build.sh`
+- **Heroku**: `Procfile`, `runtime.txt`, `release.sh`
 
 ---
 

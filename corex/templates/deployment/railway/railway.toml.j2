@@ -1,0 +1,21 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+{% if auto_db %}
+[database]
+provider = "postgresql"
+{% endif %}
+
+[env]
+DJANGO_SETTINGS_MODULE = "{{ project_name }}.settings"
+DEBUG = "False"
+ALLOWED_HOSTS = "*"
+{% if region %}
+RAILWAY_REGION = "{{ region }}"
+{% endif %}

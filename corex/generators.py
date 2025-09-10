@@ -796,3 +796,159 @@ def generate_integration(project_root: Path, service: str, config: Optional[str]
     except Exception as e:
         print_error(f"Failed to generate integration: {e}")
         return False
+
+
+def generate_deployment(
+    project_root: Path,
+    platform: str,
+    env_file: str,
+    auto_db: bool,
+    domain: Optional[str],
+    region: Optional[str],
+) -> bool:
+    """Generate deployment configuration for various platforms"""
+    try:
+        # Get templates directory
+        templates_dir = get_template_path("deployment")
+        
+        # Create Jinja2 environment
+        env = Environment(loader=FileSystemLoader(templates_dir))
+        
+        # Deployment context
+        context = {
+            "platform": platform,
+            "project_name": project_root.name,
+            "env_file": env_file,
+            "auto_db": auto_db,
+            "domain": domain,
+            "region": region,
+            "python_version": "3.9",
+        }
+        
+        # Generate platform-specific files
+        platform_files = get_platform_files(platform)
+        
+        for filename in platform_files:
+            try:
+                template = env.get_template(f"{platform}/{filename}.j2")
+                content = template.render(**context)
+                
+                # Write file to project root
+                (project_root / filename).write_text(content)
+                print_info(f"Generated {filename} for {platform}")
+                
+            except Exception as e:
+                print_warning(f"Could not generate {filename} for {platform}: {e}")
+        
+        # Generate common deployment files if they don't exist
+        generate_common_deployment_files(project_root, context)
+        
+        print_success(f"Deployment configuration for {platform} generated successfully")
+        return True
+        
+    except Exception as e:
+        print_error(f"Failed to generate deployment configuration: {e}")
+        return False
+
+
+def get_platform_files(platform: str) -> List[str]:
+    """Get list of files to generate for each platform"""
+    platform_files = {
+        "vercel": ["vercel.json", "requirements.txt"],
+        "railway": ["railway.toml", "Procfile"],
+        "render": ["render.yaml", "build.sh"],
+        "heroku": ["Procfile", "runtime.txt", "release.sh"],
+    }
+    
+    return platform_files.get(platform, [])
+
+
+def generate_common_deployment_files(project_root: Path, context: Dict) -> None:
+    """Generate common deployment files if they don't exist"""
+    # Generate Dockerfile if it doesn't exist
+    dockerfile_path = project_root / "Dockerfile"
+    if not dockerfile_path.exists():
+        dockerfile_content = f"""# Dockerfile for {context['project_name']}
+FROM python:{context['python_version']}-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \\
+    build-essential \\
+    libpq-dev \\
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . .
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["gunicorn", "{context['project_name']}.wsgi:application", "--bind", "0.0.0.0:8000"]
+"""
+        dockerfile_path.write_text(dockerfile_content)
+        print_info("Generated Dockerfile")
+    
+    # Generate docker-compose.yml if it doesn't exist
+    docker_compose_path = project_root / "docker-compose.yml"
+    if not docker_compose_path.exists():
+        docker_compose_content = f"""version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB={context['project_name']}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+"""
+        docker_compose_path.write_text(docker_compose_content)
+        print_info("Generated docker-compose.yml")
+    
+    # Update requirements.txt with deployment dependencies
+    requirements_path = project_root / "requirements.txt"
+    if requirements_path.exists():
+        content = requirements_path.read_text()
+        deployment_deps = [
+            "gunicorn>=20.1.0",
+            "psycopg2-binary>=2.9.0",
+            "whitenoise>=6.0.0",
+            "dj-database-url>=1.0.0",
+        ]
+        
+        for dep in deployment_deps:
+            if dep.split(">=")[0] not in content:
+                content += f"\n{dep}"
+        
+        requirements_path.write_text(content)
+        print_info("Updated requirements.txt with deployment dependencies")

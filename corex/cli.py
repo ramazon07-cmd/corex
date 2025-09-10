@@ -15,6 +15,7 @@ from rich.text import Text
 from .commands import (
     app_command,
     ci_command,
+    deploy_command,
     doctor_command,
     integrate_command,
     new_command,
@@ -183,6 +184,19 @@ def doctor(ctx: click.Context, fix: bool) -> None:
 def seed(ctx: click.Context, app: Optional[str], count: int) -> None:
     """Generate demo data for apps"""
     seed_command(ctx, app, count)
+
+
+@main.command()
+@click.option("--platform", type=click.Choice(["vercel", "railway", "render", "heroku"]), required=True, help="Deployment platform")
+@click.option("--env-file", default=".env", help="Environment file to use")
+@click.option("--auto-db", is_flag=True, help="Automatically provision database")
+@click.option("--domain", help="Custom domain name")
+@click.option("--region", help="Deployment region")
+@click.option("--force", is_flag=True, help="Force deployment even if checks fail")
+@click.pass_context
+def deploy(ctx: click.Context, platform: str, env_file: str, auto_db: bool, domain: Optional[str], region: Optional[str], force: bool) -> None:
+    """Deploy Django project to cloud platforms"""
+    deploy_command(ctx, platform, env_file, auto_db, domain, region, force)
 
 
 if __name__ == "__main__":

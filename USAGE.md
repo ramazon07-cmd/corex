@@ -93,6 +93,7 @@ CoreX provides a comprehensive set of commands for Django development:
 ### DevOps Commands
 - [`corex ci`](#cicd-setup) - Setup CI/CD pipelines
 - [`corex integrate`](#service-integrations) - Integrate external services
+- [`corex deploy`](#deployment) - Deploy to cloud platforms
 
 ---
 
@@ -392,6 +393,62 @@ corex ci --github --docker
 - Security scanning
 - Docker image building
 - Deployment automation
+
+### Deployment
+
+Deploy your Django projects directly to popular cloud platforms with a single command:
+
+```bash
+corex deploy --platform=PLATFORM [OPTIONS]
+```
+
+**Supported Platforms:**
+- **Vercel**: Zero-config deployments with global CDN
+- **Railway**: Infrastructure platform with automatic scaling
+- **Render**: Full-stack cloud platform with managed databases
+- **Heroku**: Cloud application platform
+
+**Available Options:**
+
+| Option | Description | Example |
+|--------|-------------|----------|
+| `--platform` | Target platform (required) | `--platform=vercel` |
+| `--env-file` | Environment file to use | `--env-file=.env.prod` |
+| `--auto-db` | Auto-provision database | `--auto-db` |
+| `--domain` | Custom domain name | `--domain=myapp.com` |
+| `--region` | Deployment region | `--region=us-east-1` |
+| `--force` | Force deployment | `--force` |
+
+**Platform-Specific Examples:**
+
+```bash
+# Deploy to Vercel (serverless)
+corex deploy --platform=vercel
+
+# Deploy to Railway with PostgreSQL
+corex deploy --platform=railway --auto-db --region=us-west1
+
+# Deploy to Render with custom domain
+corex deploy --platform=render --auto-db --domain=myapp.render.com
+
+# Deploy to Heroku with custom region
+corex deploy --platform=heroku --auto-db --region=eu
+```
+
+**What the deploy command does:**
+1. **Health Check**: Validates project structure and dependencies
+2. **Configuration Generation**: Creates platform-specific config files
+3. **Environment Setup**: Processes .env variables for deployment
+4. **Database Provisioning**: Sets up PostgreSQL (if --auto-db)
+5. **Deployment**: Executes platform-specific deployment commands
+6. **Status Reporting**: Shows deployment logs and final URL
+
+**Generated Files:**
+- **Vercel**: `vercel.json`, deployment configuration
+- **Railway**: `railway.toml`, `Procfile`
+- **Render**: `render.yaml`, `build.sh`
+- **Heroku**: `Procfile`, `runtime.txt`, `release.sh`
+- **Common**: `Dockerfile`, updated `requirements.txt`
 
 ---
 

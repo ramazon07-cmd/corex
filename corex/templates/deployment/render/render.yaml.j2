@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: {{ project_name }}
+    env: python
+    region: {{ region or 'oregon' }}
+    plan: starter
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn {{ project_name }}.wsgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: {{ project_name }}.settings
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "{{ python_version }}"
+    {% if auto_db %}
+  - type: postgres
+    name: {{ project_name }}-db
+    databaseName: {{ project_name }}
+    user: {{ project_name }}
+    region: {{ region or 'oregon' }}
+    plan: starter
+    {% endif %}
