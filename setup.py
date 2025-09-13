@@ -19,7 +19,7 @@ setup(
     description="A comprehensive Django scaffolding framework for rapid application development",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/corex",
+    url="https://github.com/ramazon07-cmd/corex",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",

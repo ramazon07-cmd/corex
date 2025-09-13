@@ -6,7 +6,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/corex.svg)](https://pypi.org/project/corex/)
 [![Django versions](https://img.shields.io/badge/django-4.2%2B-blue.svg)](https://www.djangoproject.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-passing-green.svg)](https://github.com/yourusername/corex)
+[![Tests](https://img.shields.io/badge/tests-passing-green.svg)](https://github.com/ramazon07-cmd/corex)
 
 CoreX is a comprehensive Django scaffolding framework that combines the simplicity of Rails generators, the flexibility of Laravel Artisan, and modern tooling like Poetry and Docker. Generate production-ready Django applications with a single command.
 
@@ -438,7 +438,7 @@ We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for deta
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/corex.git
+git clone https://github.com/ramazon07-cmd/corex.git
 cd corex
 
 # Install dependencies

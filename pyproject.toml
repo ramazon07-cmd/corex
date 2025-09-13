@@ -40,8 +40,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/corex"
-Repository = "https://github.com/yourusername/corex"
+Homepage = "https://github.com/ramazon07-cmd/corex"
+Repository = "https://github.com/ramazon07-cmd/corex"
 Documentation = "https://corex.readthedocs.io"
 
 [project.scripts]
