@@ -6,3 +6,5 @@ colorama>=0.4.6
 rich>=13.7.0
 python-dotenv>=1.0.0
 pathlib2>=2.3.7
+typing-extensions>=4.8.0
+toml>=0.10.2

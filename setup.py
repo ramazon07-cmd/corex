@@ -13,7 +13,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="corex",
-    version="0.1.0",
+    version="1.0.0",
     author="CoreX Team",
     author_email="hello@corex.dev",
     description="A comprehensive Django scaffolding framework for rapid application development",
@@ -22,7 +22,7 @@ setup(
     url="https://github.com/ramazon07-cmd/corex",
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
