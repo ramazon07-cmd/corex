@@ -729,6 +729,7 @@ def generate_ci_pipeline(project_root: Path, github: bool, gitlab: bool, docker:
         context = {
             "docker": docker,
             "python_version": "3.9",
+            "database": "postgres",  # Default for CI
         }
         
         if github:

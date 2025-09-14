@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+PyPI-Recovery-Codes-b92874193-2025-09-13T07_24_27.146928.txt
 build/
 develop-eggs/
 dist/
@@ -166,16 +167,3 @@ generated_projects/
 demo_projects/
 example_projects/
 sample_projects/
-
-# CoreX generated demo projects
-blog_tailwind_jwt/
-blog_bootstrap_session/
-shop_tailwind_jwt/
-wiki_bootstrap_allauth/
-crm_tailwind_session/
-forum_tailwind_jwt/
-social_bootstrap_session/
-ecommerce_postgres/
-myblog/
-myshop/
-mywiki/
