@@ -109,7 +109,7 @@ jobs:
         safety check || true
     
     - name: Archive security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
         name: security-reports
         path: bandit-report.json
