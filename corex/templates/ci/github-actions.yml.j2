@@ -156,3 +156,38 @@ jobs:
       run: |
         echo "Add your deployment script here"
         # Example: Deploy to Heroku, AWS, etc.
+
+  CI - Generate Project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '{{ python_version }}'
+
+      - name: Install CoreX
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Generate project
+        run: |
+          python - <<'PY'
+import sys
+from click.testing import CliRunner
+from corex import cli
+runner = CliRunner()
+res = runner.invoke(cli.main, ['new', '{{ project_name }}', '--auth', 'jwt', '--ui', 'tailwind', '--database', 'postgres'])
+print(res.output)
+if res.exit_code != 0:
+    sys.exit(res.exit_code)
+PY
+
+      - name: Project checks
+        run: |
+          cd {{ project_name }}
+          python -m pip install -r requirements.txt || true
+          python manage.py check || true
+          python manage.py migrate --noinput || true

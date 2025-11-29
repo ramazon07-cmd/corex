@@ -1,0 +1,49 @@
+# Industry Templates Metadata
+version: 1.0.0
+description: Industry-specific templates for CoreX Django framework
+industries:
+  - name: legal
+    title: Legal Services
+    description: Template for law firms, legal consultancies, and legal tech applications
+    modules:
+      - auth
+      - billing
+      - documents
+      - calendar
+      - clients
+  - name: realestate
+    title: Real Estate
+    description: Template for real estate agencies, property management, and listings
+    modules:
+      - auth
+      - properties
+      - listings
+      - agents
+      - transactions
+  - name: ecommerce
+    title: E-commerce
+    description: Template for online stores, marketplaces, and e-commerce platforms
+    modules:
+      - auth
+      - products
+      - orders
+      - payments
+      - inventory
+  - name: healthcare
+    title: Healthcare
+    description: Template for clinics, hospitals, and healthcare management systems
+    modules:
+      - auth
+      - patients
+      - appointments
+      - medical_records
+      - billing
+  - name: fintech
+    title: Financial Technology
+    description: Template for fintech startups, payment processors, and financial services
+    modules:
+      - auth
+      - accounts
+      - transactions
+      - compliance
+      - analytics

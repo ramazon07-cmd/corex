@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Store - List{% endblock %}
+
+{% block content %}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+            Products
+            
+        </h1>
+        
+    </div>
+
+    <div class="grid gap-6">
+        {% for product in products %}
+        <div class="card">
+            
+            <div class="flex items-center space-x-4">
+                {% if product.featured_image %}
+                <img src="{{ product.featured_image.url }}" alt="{{ product.name }}" class="w-16 h-16 object-cover rounded">
+                {% endif %}
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold">
+                        <a href="{% url 'store:product_detail' product.slug %}" class="text-blue-600 hover:text-blue-800">
+                            {{ product.name }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600">{{ product.description|truncatewords:20 }}</p>
+                    <p class="text-xl font-bold text-green-600">${{ product.current_price }}</p>
+                </div>
+            </div>
+            
+        </div>
+        {% empty %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">No products found.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mt-8 flex justify-center">
+        <nav class="flex space-x-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50">Previous</a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-2 border border-blue-500 bg-blue-500 text-white rounded">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50">Next</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}

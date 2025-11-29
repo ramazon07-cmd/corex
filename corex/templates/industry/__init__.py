@@ -1,0 +1,3 @@
+"""
+Industry Templates Package
+"""

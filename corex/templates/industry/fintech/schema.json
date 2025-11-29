@@ -1,0 +1,53 @@
+{
+  "name": "fintech",
+  "title": "Financial Technology",
+  "description": "Template for fintech startups, payment processors, and financial services",
+  "version": "1.0.0",
+  "modules": [
+    {
+      "name": "auth",
+      "required": true,
+      "description": "User authentication and authorization"
+    },
+    {
+      "name": "accounts",
+      "required": true,
+      "description": "Financial account management"
+    },
+    {
+      "name": "transactions",
+      "required": true,
+      "description": "Financial transactions and transfers"
+    },
+    {
+      "name": "compliance",
+      "required": true,
+      "description": "Regulatory compliance and reporting"
+    },
+    {
+      "name": "analytics",
+      "required": true,
+      "description": "Financial analytics and reporting"
+    },
+    {
+      "name": "payments",
+      "required": false,
+      "description": "Payment processing integration"
+    },
+    {
+      "name": "investments",
+      "required": false,
+      "description": "Investment portfolio management"
+    }
+  ],
+  "dependencies": {
+    "python": ">=3.8",
+    "django": ">=3.2",
+    "packages": [
+      "django-rest-framework>=3.12.0",
+      "stripe>=2.60.0",
+      "django-countries>=7.2.0",
+      "python-dateutil>=2.8.0"
+    ]
+  }
+}

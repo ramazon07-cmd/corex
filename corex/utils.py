@@ -3,6 +3,8 @@ CoreX utilities and helper functions
 """
 
 import os
+import re
+import secrets
 import shutil
 import subprocess
 import sys
@@ -197,7 +199,10 @@ def get_app_templates() -> List[str]:
         "elearn",
         "social",
         "crm",
-        "shop"
+        "shop",
+        "education",
+        "fintech",
+        "healthcare"
     ]
 
 
@@ -443,3 +448,50 @@ staticfiles/
     gitignore_path = path / ".gitignore"
     gitignore_path.write_text(gitignore_content)
     print_success("Created .gitignore file")
+
+
+def generate_secret_key(length: int = 50) -> str:
+    """Generate a cryptographically secure SECRET_KEY suitable for Django.
+
+    Uses URL-safe base64 and trims to the requested length.
+    """
+    # token_urlsafe returns a string longer than requested length most of the time
+    token = secrets.token_urlsafe(length)
+    return token[:length]
+
+
+def find_unresolved_jinja_placeholders(text: str) -> List[str]:
+    """Return a list of unresolved Jinja2 placeholder snippets found in text.
+
+    Detects both variable markers ({{ ... }}) and block tags({% ... %}).
+    """
+    placeholders = set()
+    for match in re.findall(r"{{\s*([^}]+?)\s*}}", text):
+        placeholders.add("{{ %s }}" % match.strip())
+    for match in re.findall(r"{%%\s*([^%]+?)\s*%%}", text):
+        placeholders.add("{% %s %}" % match.strip())
+    return sorted(placeholders)
+
+
+def scan_project_for_unresolved_placeholders(project_root: Path, extensions: List[str] = None) -> List[Tuple[Path, List[str]]]:
+    """Scan generated project files for unresolved Jinja2 placeholders.
+
+    Returns a list of tuples (file_path, [placeholders...]) for files that contain markers.
+    """
+    if extensions is None:
+        extensions = ['.py', '.html', '.md', '.txt', '.env', '.yml', '.yaml', '.json']
+
+    findings: List[Tuple[Path, List[str]]] = []
+
+    for path in project_root.rglob('*'):
+        if path.is_file() and (path.suffix in extensions or path.name.endswith('.jinja') or path.name.endswith('.j2')):
+            try:
+                content = path.read_text()
+            except Exception:
+                continue
+
+            placeholders = find_unresolved_jinja_placeholders(content)
+            if placeholders:
+                findings.append((path, placeholders))
+
+    return findings

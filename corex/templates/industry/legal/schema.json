@@ -1,0 +1,53 @@
+{
+  "name": "legal",
+  "title": "Legal Services",
+  "description": "Template for law firms, legal consultancies, and legal tech applications",
+  "version": "1.0.0",
+  "modules": [
+    {
+      "name": "auth",
+      "required": true,
+      "description": "User authentication and authorization"
+    },
+    {
+      "name": "clients",
+      "required": true,
+      "description": "Client management and relationships"
+    },
+    {
+      "name": "cases",
+      "required": true,
+      "description": "Case management and tracking"
+    },
+    {
+      "name": "documents",
+      "required": true,
+      "description": "Legal document management"
+    },
+    {
+      "name": "billing",
+      "required": true,
+      "description": "Billing and invoicing"
+    },
+    {
+      "name": "calendar",
+      "required": false,
+      "description": "Court calendar and scheduling"
+    },
+    {
+      "name": "matters",
+      "required": false,
+      "description": "Matter management and tracking"
+    }
+  ],
+  "dependencies": {
+    "python": ">=3.8",
+    "django": ">=3.2",
+    "packages": [
+      "django-rest-framework>=3.12.0",
+      "python-docx>=0.8.11",
+      "reportlab>=3.6.0",
+      "django-countries>=7.2.0"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "wiki_bootstrap_allauth",
+  "version": "1.0.0",
+  "description": "Django project with Bootstrap 5",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo 'Bootstrap CSS loaded from CDN'",
+    "build": "echo 'Bootstrap CSS loaded from CDN'"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": ["django", "bootstrap"],
+  "author": "",
+  "license": "MIT"
+}

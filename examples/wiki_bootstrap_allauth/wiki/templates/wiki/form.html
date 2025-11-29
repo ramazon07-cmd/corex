@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Wiki - Form{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="h3 mb-4">{% if page.pk %}Edit Page{% else %}Create New Page{% endif %}</h1>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="title" name="title" 
+                           value="{{ page.title|default:'' }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="content" class="form-label">Content *</label>
+                    <textarea class="form-control" id="content" name="content" rows="15" required>{{ page.content|default:'' }}</textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="draft" {% if page.status == 'draft' or not page.pk %}selected{% endif %}>Draft</option>
+                                <option value="published" {% if page.status == 'published' %}selected{% endif %}>Published</option>
+                                <option value="archived" {% if page.status == 'archived' %}selected{% endif %}>Archived</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="tags" class="form-label">Tags</label>
+                            <input type="text" class="form-control" id="tags" name="tags" 
+                                   value="{{ page.tags|default:'' }}" 
+                                   placeholder="Comma-separated tags">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="meta_description" class="form-label">Meta Description</label>
+                    <textarea class="form-control" id="meta_description" name="meta_description" 
+                              rows="2" maxlength="300" 
+                              placeholder="Brief description for SEO (optional)">{{ page.meta_description|default:'' }}</textarea>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        {% if page.pk %}Update Page{% else %}Create Page{% endif %}
+                    </button>
+                    <a href="{% if page.pk %}{% url 'wiki:page_detail' page.slug %}{% else %}{% url 'wiki:page_list' %}{% endif %}" 
+                       class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "corex-maintainers"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # JavaScript dependencies
+  - package-ecosystem: "npm"
+    directory: "/gui/corex-gui"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "corex-maintainers"
+    labels:
+      - "dependencies"
+      - "javascript"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "corex-maintainers"
+    labels:
+      - "dependencies"
+      - "github-actions"
